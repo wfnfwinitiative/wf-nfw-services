@@ -1,13 +1,18 @@
 name: Manual Deploy to Vercel
 
 on:
-  workflow_dispatch:  # Manual trigger button
+  workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set Vercel environment variables
+        run: |
+          npx vercel env add DATABASE_URL "postgresql+asyncpg://postgres:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_SERVER }}:${{ secrets.DB_PORT }}/postgres" --token=${{ secrets.VERCEL_TOKEN }} --yes
 
       - name: Deploy to Vercel
         id: deploy
