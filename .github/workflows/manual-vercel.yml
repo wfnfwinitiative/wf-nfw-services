@@ -1,5 +1,4 @@
 name: Manual Deploy to Vercel
-
 on:
   workflow_dispatch:
 
@@ -9,13 +8,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set Vercel environment variables
-        run: |
-          npx vercel env add DATABASE_URL "postgresql+asyncpg://postgres:${{ secrets.DB_PASSWORD }}@${{ secrets.DB_SERVER }}:${{ secrets.DB_PORT }}/postgres" --token=${{ secrets.VERCEL_TOKEN }} --yes
-
+      
       - name: Deploy to Vercel
-        id: deploy
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
