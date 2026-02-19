@@ -1,2 +1,9 @@
 fastapi
 uvicorn[standard]
+sqlalchemy[asyncio]
+psycopg[binary]
+alembic  # migrations
+pydantic-settings  # config
+python-dotenv
+email-validator
+asyncpg
