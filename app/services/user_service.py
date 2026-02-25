@@ -1,35 +1,28 @@
-from app.repositories.user_repository import UserRepository
-from app.entities.user import User
-from app.models import UserCreate, UserUpdate
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
-from uuid import UUID
+from fastapi import HTTPException
+from app.db.db_read import get_role_by_name
+from app.db.db_write import create_user_record, assign_role_to_user
+from app.core.security import hash_password
 
 
-class UserService:
-    def __init__(self, session: AsyncSession):
-        self.repo = UserRepository(session)
+async def create_user_with_role(
+    db: AsyncSession, name: str, mobile: str, password: str, role_name: str
+):
 
-    async def list_users(self) -> List[User]:
-        return await self.repo.list()
+    # Validate role
+    role = await get_role_by_name(db, role_name)
+    if not role:
+        raise HTTPException(status_code=400, detail="Invalid role")
 
-    async def get_user(self, user_id: UUID) -> Optional[User]:
-        return await self.repo.get(user_id)
+    # Hash password
+    hashed = hash_password(password)
 
-    async def create_user(self, payload: UserCreate) -> User:
-        user = User(email=payload.email, phone=payload.phone, name=payload.name)
-        return await self.repo.create(user)
+    # Create user
+    user = await create_user_record(db, name, mobile, hashed)
 
-    async def update_user(self, user_id: UUID, payload: UserUpdate) -> Optional[User]:
-        user = await self.repo.get(user_id)
-        if not user:
-            return None
-        data = payload.dict(exclude_unset=True)
-        return await self.repo.update(user, **data)
+    # Assign role
+    await assign_role_to_user(db, user.user_id, role.role_id)
 
-    async def delete_user(self, user_id: UUID) -> bool:
-        user = await self.repo.get(user_id)
-        if not user:
-            return False
-        await self.repo.delete(user)
-        return True
+    await db.commit()
+
+    return user
