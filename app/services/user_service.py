@@ -1,28 +1,43 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
-from app.db.db_read import get_role_by_name
-from app.db.db_write import create_user_record, assign_role_to_user
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.repositories.user_repository import UserRepository
 from app.core.security import hash_password
 
 
-async def create_user_with_role(
-    db: AsyncSession, name: str, mobile: str, password: str, role_name: str
-):
+class UserService:
+    def __init__(self, db: AsyncSession):
+        self.repo = UserRepository(db)
+        self.db = db
 
-    # Validate role
-    role = await get_role_by_name(db, role_name)
-    if not role:
-        raise HTTPException(status_code=400, detail="Invalid role")
+    async def create_user(self, name: str, mobile_number: str, password: str):
+        existing = await self.repo.get_by_mobile(mobile_number)
+        if existing:
+            raise HTTPException(status_code=400, detail="Mobile number already registered")
 
-    # Hash password
-    hashed = hash_password(password)
+        password_hash = hash_password(password)
 
-    # Create user
-    user = await create_user_record(db, name, mobile, hashed)
+        user = await self.repo.create(name, mobile_number, password_hash)
+        await self.db.commit()
+        return user
 
-    # Assign role
-    await assign_role_to_user(db, user.user_id, role.role_id)
+    async def get_user(self, user_id: int):
+        user = await self.repo.get_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
 
-    await db.commit()
+    async def get_user_by_mobile(self, phone_number: str):
+        user = await self.repo.get_by_mobile(phone_number)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+            return user
 
-    return user
+    async def get_all_users(self):
+        return await self.repo.get_all()
+
+    async def deactivate_user(self, user_id: int):
+        user = await self.repo.deactivate(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        await self.db.commit()
+        return {"message": "User deactivated"}

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     #DB_HOST: str = os.getenv("DB_HOST")
     DB_SCHEMA: str = os.getenv("DB_SCHEMA", "wfnfw")
     DATABASE_URL: str = os.getenv("DATABASE_URL", "already configured in vecel environment variables")
+    print(DATABASE_URL)
 
     class Config:
         env_file = ".env"
