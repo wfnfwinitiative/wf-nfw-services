@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import logging
 import time
 
@@ -7,6 +8,17 @@ from app.core.config import settings
 from app.routes import auth, admin, coordinator, driver, health, feature_flag
 
 app = FastAPI(title=settings.PROJECT_NAME, version="0.1.0")
+
+# -------------------------
+# CORS Middleware
+# -------------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for testing. Restrict in production!
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # -------------------------
 # Logging Middleware
