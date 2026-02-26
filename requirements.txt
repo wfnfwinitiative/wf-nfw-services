@@ -7,3 +7,5 @@ pydantic-settings  # config
 python-dotenv
 email-validator
 asyncpg
+passlib[bcrypt]
+python-jose[cryptography]
