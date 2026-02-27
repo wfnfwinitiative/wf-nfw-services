@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.entities.feature_flag_entities import FeatureFlag
+from app.models.feature_flag_models import FeatureFlag
 
 
 class FeatureFlagRepository:

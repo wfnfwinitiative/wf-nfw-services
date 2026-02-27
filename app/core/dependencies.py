@@ -24,3 +24,9 @@ def require_role(required_roles: list[str]):
         return user
 
     return role_checker
+
+
+def get_admin_or_coordinator(
+    user=Depends(require_role(["ADMIN", "COORDINATOR"]))
+):
+    return user

@@ -1,33 +1,32 @@
-from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional
+from sqlalchemy import (
+    Column,
+    BigInteger,
+    String,
+    Boolean,
+    Text,
+    TIMESTAMP,
+    ForeignKey,
+    Index,
+)
+from sqlalchemy.schema import Identity
+from sqlalchemy.sql import func
+from app.db.session import Base
+from app.core.config import settings
+
+SCHEMA = settings.DB_SCHEMA
 
 
-# =====================================================
-# BASE CONFIG
-# =====================================================
-
-class FeatureFlagBaseSchema(BaseModel):
-    class Config:
-        from_attributes = True  # Pydantic v2 compatible
-
-
-# =====================================================
+# ==============================
 # FEATURE FLAGS
-# =====================================================
+# ==============================
 
-class FeatureFlagCreate(BaseModel):
-    feature_flag_name: str
-    enabled: bool = False
+class FeatureFlag(Base):
+    __tablename__ = "feature_flags"
+    __table_args__ = {"schema": SCHEMA}
 
-
-class FeatureFlagUpdate(BaseModel):
-    enabled: bool
-
-
-class FeatureFlagRead(FeatureFlagBaseSchema):
-    id: int
-    feature_flag_name: str
-    enabled: bool
-    created_at: datetime
-    updated_at: datetime
+    id = Column(BigInteger, Identity(), primary_key=True)
+    feature_flag_name = Column(String(100), unique=True, nullable=False)
+    enabled = Column(Boolean, default=False, nullable=False)
+    creator_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"), nullable=False)
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)

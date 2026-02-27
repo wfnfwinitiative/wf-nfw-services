@@ -1,25 +1,34 @@
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
-from app.db.db_read import get_user_by_mobile, get_user_role
 from app.core.security import verify_password, create_access_token
+from app.repositories.user_repository import UserRepository
+from app.repositories.user_role_repository import UserRoleRepository
 
 
-async def authenticate_user(db, mobile: str, password: str):
+class AuthService:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+        self.user_repository = UserRepository(db=db)
+        self.user_role_repository = UserRoleRepository(db=db)
 
-    # 1️⃣ Fetch user
-    user = await get_user_by_mobile(db, mobile)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+    async def authenticate_user(self,  mobile: str, password: str):
 
-    # 2️⃣ Verify password
-    if not verify_password(password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        # 1️⃣ Fetch user
+        user = await self.user_repository.get_by_mobile(mobile)
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # 3️⃣ Fetch role
-    role_name = await get_user_role(db, user.user_id)
-    if not role_name:
-        raise HTTPException(status_code=403, detail="User has no assigned role")
+        # 2️⃣ Verify password
+        if not verify_password(password, user.password_hash):
+            raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # 4️⃣ Create token with role
-    token = create_access_token(user_id=user.user_id, role=role_name)
+        # 3️⃣ Fetch role
+        user_roles = await self.user_role_repository.get_roles_for_user(user.user_id)
+        if not user_roles:
+            raise HTTPException(status_code=403, detail="User has no assigned role")
 
-    return token
+        # 4️⃣ Create token with role
+        print(user.user_id, user_roles)
+        token = create_access_token(user_id=user.user_id, role=user_roles)
+
+        return token

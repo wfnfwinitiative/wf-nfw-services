@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.core.dependencies import require_role
-from app.models.feature_flag_models import FeatureFlagCreate, FeatureFlagUpdate, FeatureFlagRead
+from app.schemas.feature_flag_schemas import FeatureFlagCreate, FeatureFlagUpdate, FeatureFlagRead
 from app.services.feature_flag_service import FeatureFlagService
 
 router = APIRouter(

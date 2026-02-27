@@ -2,7 +2,7 @@ import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.db.session import engine
-from app.entities.entities import Role
+from app.schemas.schemas import Role
 
 ROLES = ["ADMIN", "COORDINATOR", "DRIVER"]
 
