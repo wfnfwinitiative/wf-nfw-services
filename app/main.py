@@ -7,7 +7,13 @@ import time
 from app.core.config import settings
 from app.routes import auth_router, health, user_router, role_router, user_role_router, feature_flag_router, vehicle_router, donor_router, hunger_spot_router, opportunity_router, opportunity_item_router, opportunity_event_router, opportunity_allocation_router
 
-app = FastAPI(title=settings.PROJECT_NAME, version="0.1.0")
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version="0.1.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
+)
 
 # -------------------------
 # CORS Middleware
@@ -49,19 +55,30 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # -------------------------
+# Root helper
+# -------------------------
+from fastapi.responses import RedirectResponse
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    return RedirectResponse(url="/docs")
+
+
+# -------------------------
 # Routers
 # -------------------------
-app.include_router(health.router)
-app.include_router(auth_router.router)
-app.include_router(user_router.router)
-app.include_router(role_router.router)
-app.include_router(feature_flag_router.router)
-app.include_router(user_role_router.router)
-app.include_router(donor_router.router)
-app.include_router(hunger_spot_router.router)
-app.include_router(opportunity_router.router)
-app.include_router(opportunity_event_router.router)
-app.include_router(opportunity_allocation_router.router)
-app.include_router(opportunity_router.router)
+app.include_router(health.router, prefix="/api")
+app.include_router(auth_router.router, prefix="/api")
+app.include_router(user_router.router, prefix="/api")
+app.include_router(role_router.router, prefix="/api")
+app.include_router(feature_flag_router.router, prefix="/api")
+app.include_router(user_role_router.router, prefix="/api")
+app.include_router(donor_router.router, prefix="/api")
+app.include_router(hunger_spot_router.router, prefix="/api")
+app.include_router(opportunity_router.router, prefix="/api")
+app.include_router(opportunity_event_router.router, prefix="/api")
+app.include_router(opportunity_allocation_router.router, prefix="/api")
+app.include_router(vehicle_router.router, prefix="/api")
 
 

@@ -16,9 +16,9 @@ class VehicleCreate(BaseModel):
 class VehicleRead(VehicleBaseSchema):
     vehicle_id: int
     vehicle_no: str
-    notes: Optional[str]
+    notes: Optional[str] = None
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
 class VehicleUpdate(BaseModel):
     vehicle_no: str

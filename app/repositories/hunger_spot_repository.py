@@ -9,8 +9,8 @@ class HungerSpotRepository:
 
     async def create(
         self,
-        creator_id: int,
-        spot_name: str,
+        creator_id: int = None,
+        spot_name: str = None,
         city: str = None,
         pincode: str = None,
         contact_person: str = None,
@@ -20,18 +20,20 @@ class HungerSpotRepository:
         capacity_meals: int = None,
         is_active: bool = True
     ) -> HungerSpot:
-        spot = HungerSpot(
-            creator_id=creator_id,
-            spot_name=spot_name,
-            city=city,
-            pincode=pincode,
-            contact_person=contact_person,
-            mobile_number=mobile_number,
-            address=address,
-            location=location,
-            capacity_meals=capacity_meals,
-            is_active=is_active,
-        )
+        params = {
+            "spot_name": spot_name,
+            "city": city,
+            "pincode": pincode,
+            "contact_person": contact_person,
+            "mobile_number": mobile_number,
+            "address": address,
+            "location": location,
+            "capacity_meals": capacity_meals,
+            "is_active": is_active,
+        }
+        if creator_id is not None:
+            params["creator_id"] = creator_id
+        spot = HungerSpot(**{k: v for k, v in params.items() if v is not None})
         self.db.add(spot)
         await self.db.flush()
         return spot

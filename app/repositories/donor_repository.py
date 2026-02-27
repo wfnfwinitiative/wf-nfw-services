@@ -9,8 +9,8 @@ class DonorRepository:
 
     async def create(
         self,
-        creator_id: int,
-        donor_name: str,
+        creator_id: int = None,
+        donor_name: str = None,
         city: str = None,
         pincode: str = None,
         contact_person: str = None,

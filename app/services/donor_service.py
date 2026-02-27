@@ -9,7 +9,8 @@ class DonorService:
         self.repository = DonorRepository(db)
         self.db = db
 
-    async def create_donor(self, creator_id: int, **data) -> Donor:
+    async def create_donor(self, creator_id: int = None, **data) -> Donor:
+        # creator_id is optional (will uncomment when column is added to DB)
         donor = await self.repository.create(creator_id=creator_id, **data)
         await self.db.commit()
         return donor

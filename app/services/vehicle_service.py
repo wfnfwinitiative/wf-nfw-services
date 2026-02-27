@@ -8,8 +8,8 @@ class VehicleService:
         self.repo = VehicleRepository(db)
         self.db = db
 
-    async def create_vehicle(self, creator_id: int, vehicle_no: str, notes: str = None):
-        vehicle = await self.repo.create(creator_id, vehicle_no, notes)
+    async def create_vehicle(self, creator_id: int = None, vehicle_no: str = None, notes: str = None):
+        vehicle = await self.repo.create(creator_id=creator_id, vehicle_no=vehicle_no, notes=notes)
         await self.db.commit()
         return vehicle
 

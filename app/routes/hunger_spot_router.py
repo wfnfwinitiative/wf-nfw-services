@@ -7,7 +7,7 @@ from app.schemas.hunger_spot_schemas import (
     HungerSpotUpdate,
 )
 from app.services.hunger_spot_service import HungerSpotService
-from app.dependencies.auth import get_current_user
+# from app.dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/hunger-spots", tags=["Hunger Spots"])
 
@@ -16,10 +16,10 @@ router = APIRouter(prefix="/hunger-spots", tags=["Hunger Spots"])
 async def create_spot(
     payload: HungerSpotCreate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    # current_user=Depends(get_current_user),
 ):
     return await HungerSpotService(db).create_hunger_spot(
-        creator_id=current_user.user_id,
+        # creator_id=current_user.user_id,
         **payload.dict(),
     )
 

@@ -14,5 +14,5 @@ class Vehicle(Base):
     vehicle_id = Column(BigInteger, Identity(), primary_key=True)
     vehicle_no = Column(String(20), unique=True, nullable=False)
     notes = Column(Text)
-    creator_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"), nullable=False)
-    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    creator_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"), nullable=True)
+    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)

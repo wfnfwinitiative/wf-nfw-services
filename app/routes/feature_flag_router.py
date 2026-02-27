@@ -6,7 +6,7 @@ from app.schemas.feature_flag_schemas import FeatureFlagCreate, FeatureFlagUpdat
 from app.services.feature_flag_service import FeatureFlagService
 
 router = APIRouter(
-    prefix="/api/feature-flags", tags=["Feature Flags"]
+    prefix="/feature-flags", tags=["Feature Flags"]
 )
 
 

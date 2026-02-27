@@ -7,7 +7,7 @@ from app.schemas.vehicle_schemas import (
     VehicleUpdate,
 )
 from app.services.vehicle_service import VehicleService
-from app.dependencies.auth import get_current_user
+# from app.dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/vehicles", tags=["Vehicles"])
 
@@ -16,10 +16,10 @@ router = APIRouter(prefix="/vehicles", tags=["Vehicles"])
 async def create_vehicle(
     payload: VehicleCreate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    # current_user=Depends(get_current_user),
 ):
     return await VehicleService(db).create_vehicle(
-        creator_id=current_user.user_id,
+        # creator_id=current_user.user_id,
         vehicle_no=payload.vehicle_no,
         notes=payload.notes,
     )

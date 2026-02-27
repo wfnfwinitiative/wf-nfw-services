@@ -31,7 +31,7 @@ class HungerSpotRead(HungerSpotBaseSchema):
     capacity_meals: Optional[int]
     is_active: bool
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
 class HungerSpotUpdate(BaseModel):
     spot_name: str

@@ -7,7 +7,7 @@ from app.schemas.donor_schemas import (
     DonorUpdate,
 )
 from app.services.donor_service import DonorService
-from app.dependencies.auth import get_current_user
+# from app.dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/donors", tags=["Donors"])
 
@@ -16,10 +16,10 @@ router = APIRouter(prefix="/donors", tags=["Donors"])
 async def create_donor(
     payload: DonorCreate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    # current_user=Depends(get_current_user),
 ):
     return await DonorService(db).create_donor(
-        creator_id=current_user.user_id,
+        # creator_id=current_user.user_id,
         **payload.dict(),
     )
 

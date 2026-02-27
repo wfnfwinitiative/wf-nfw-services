@@ -9,7 +9,8 @@ class HungerSpotService:
         self.repository = HungerSpotRepository(db)
         self.db = db
 
-    async def create_hunger_spot(self, creator_id: int, **data) -> HungerSpot:
+    async def create_hunger_spot(self, creator_id: int = None, **data) -> HungerSpot:
+        # creator_id is optional while auth is disabled
         spot = await self.repository.create(creator_id=creator_id, **data)
         await self.db.commit()
         return spot
