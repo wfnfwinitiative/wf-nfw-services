@@ -19,7 +19,7 @@ async def create_spot(
     # current_user=Depends(get_current_user),
 ):
     return await HungerSpotService(db).create_hunger_spot(
-        # creator_id=current_user.user_id,
+        creator_id=4,
         **payload.dict(),
     )
 

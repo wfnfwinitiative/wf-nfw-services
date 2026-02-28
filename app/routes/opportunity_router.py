@@ -16,10 +16,10 @@ router = APIRouter(prefix="/opportunities", tags=["Opportunities"])
 async def create_opportunity(
     payload: OpportunityCreate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(get_current_user),
+    # current_user=Depends(get_current_user),
 ):
     return await OpportunityService(db).create_opportunity(
-        creator_id=current_user.user_id,
+        creator_id=4,
         **payload.dict(),
     )
 

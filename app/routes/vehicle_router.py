@@ -19,7 +19,7 @@ async def create_vehicle(
     # current_user=Depends(get_current_user),
 ):
     return await VehicleService(db).create_vehicle(
-        # creator_id=current_user.user_id,
+        creator_id=4,
         vehicle_no=payload.vehicle_no,
         notes=payload.notes,
     )
