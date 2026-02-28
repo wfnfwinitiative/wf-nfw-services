@@ -38,22 +38,22 @@ class FeatureFlagService:
         """Get all feature flags"""
         return await self.repository.get_all()
 
-    async def update_feature_flag(self, flag_id: int, enabled: bool) -> FeatureFlag:
-        """Update feature flag enabled status"""
-        flag = await self.repository.get_by_id(flag_id)
+    async def update_feature_flag(self, feature_flag_name: str, enabled: bool) -> FeatureFlag:
+        """Update feature flag enabled status by name"""
+        flag = await self.repository.get_by_name(feature_flag_name)
         if not flag:
             raise HTTPException(status_code=404, detail="Feature flag not found")
 
-        updated_flag = await self.repository.update(flag_id, enabled)
+        updated_flag = await self.repository.update_by_name(feature_flag_name, enabled)
         await self.db.commit()
         return updated_flag
 
-    async def delete_feature_flag(self, flag_id: int) -> dict:
-        """Delete a feature flag"""
-        flag = await self.repository.get_by_id(flag_id)
+    async def delete_feature_flag(self, feature_flag_name: str) -> dict:
+        """Delete a feature flag by name"""
+        flag = await self.repository.get_by_name(feature_flag_name)
         if not flag:
             raise HTTPException(status_code=404, detail="Feature flag not found")
 
-        await self.repository.delete(flag_id)
+        await self.repository.delete_by_name(feature_flag_name)
         await self.db.commit()
         return {"message": "Feature flag deleted successfully"}

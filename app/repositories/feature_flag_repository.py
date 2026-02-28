@@ -41,9 +41,26 @@ class FeatureFlagRepository:
             await self.db.flush()
         return flag
 
+    async def update_by_name(self, feature_flag_name: str, enabled: bool) -> FeatureFlag:
+        """Update feature flag enabled status using name"""
+        flag = await self.get_by_name(feature_flag_name)
+        if flag:
+            flag.enabled = enabled
+            await self.db.flush()
+        return flag
+
     async def delete(self, flag_id: int) -> bool:
         """Delete a feature flag"""
         flag = await self.get_by_id(flag_id)
+        if flag:
+            await self.db.delete(flag)
+            await self.db.flush()
+            return True
+        return False
+
+    async def delete_by_name(self, feature_flag_name: str) -> bool:
+        """Delete a feature flag using name"""
+        flag = await self.get_by_name(feature_flag_name)
         if flag:
             await self.db.delete(flag)
             await self.db.flush()

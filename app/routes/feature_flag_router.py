@@ -11,14 +11,14 @@ router = APIRouter(
 
 
 # ============================================
-# CREATE FEATURE FLAG (ADMIN ONLY)
+# CREATE FEATURE FLAG
 # ============================================
-@router.post("", response_model=FeatureFlagRead, dependencies=[Depends(require_role(["ADMIN"]))])
+@router.post("", response_model=FeatureFlagRead)
 async def create_feature_flag(
     data: FeatureFlagCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    """Create a new feature flag (Admin only)"""
+    """Create a new feature flag"""
     service = FeatureFlagService(db)
     flag = await service.create_feature_flag(data.feature_flag_name, data.enabled)
     return flag
@@ -48,39 +48,30 @@ async def get_feature_flag_by_name(
     flag = await service.get_feature_flag_by_name(feature_flag_name)
     return flag
 
+# Note: retrieval by ID is no longer supported via the router; the name
+# is treated as the unique identifier for flags.
 
 # ============================================
-# GET FEATURE FLAG BY ID
+# UPDATE FEATURE FLAG
 # ============================================
-@router.get("/{flag_id}", response_model=FeatureFlagRead)
-async def get_feature_flag(flag_id: int, db: AsyncSession = Depends(get_db)):
-    """Get a feature flag by ID"""
-    service = FeatureFlagService(db)
-    flag = await service.get_feature_flag(flag_id)
-    return flag
-
-
-# ============================================
-# UPDATE FEATURE FLAG (ADMIN ONLY)
-# ============================================
-@router.put("/{flag_id}", response_model=FeatureFlagRead, dependencies=[Depends(require_role(["ADMIN"]))])
+@router.put("/{feature_flag_name}", response_model=FeatureFlagRead)
 async def update_feature_flag(
-    flag_id: int,
+    feature_flag_name: str,
     data: FeatureFlagUpdate,
     db: AsyncSession = Depends(get_db)
 ):
-    """Update feature flag enabled status (Admin only)"""
+    """Update feature flag enabled status by name"""
     service = FeatureFlagService(db)
-    flag = await service.update_feature_flag(flag_id, data.enabled)
+    flag = await service.update_feature_flag(feature_flag_name, data.enabled)
     return flag
 
 
 # ============================================
-# DELETE FEATURE FLAG (ADMIN ONLY)
+# DELETE FEATURE FLAG
 # ============================================
-@router.delete("/{flag_id}", dependencies=[Depends(require_role(["ADMIN"]))])
-async def delete_feature_flag(flag_id: int, db: AsyncSession = Depends(get_db)):
-    """Delete a feature flag (Admin only)"""
+@router.delete("/{feature_flag_name}")
+async def delete_feature_flag(feature_flag_name: str, db: AsyncSession = Depends(get_db)):
+    """Delete a feature flag by name"""
     service = FeatureFlagService(db)
-    result = await service.delete_feature_flag(flag_id)
+    result = await service.delete_feature_flag(feature_flag_name)
     return result
