@@ -17,6 +17,7 @@ class Opportunity(Base):
     opportunity_id = Column(BigInteger, Identity(), primary_key=True)
 
     donor_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.donors.donor_id"), nullable=False)
+    hunger_spot_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.hunger_spots.hunger_spot_id"))
     status_id = Column(SmallInteger, ForeignKey(f"{SCHEMA}.statuses.status_id"), nullable=False)
 
     driver_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"))
