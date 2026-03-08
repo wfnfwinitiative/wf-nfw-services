@@ -35,14 +35,14 @@ class OpportunityEventItemDriverService:
        
         async with self.db.begin():
 
-            opportunity = await self.event_repo.create(event_data)
+            opportunity = await self.event_repo.create(**event_data)
 
             created_items = []
             for item in items_data:
                 item["opportunity_id"] = opportunity.opportunity_id
-                created_items.append(await self.item_repo.create(item))
+                created_items.append(await self.item_repo.create(**item))
 
         return {
-            "opportunity": opportunity,
+            "event": opportunity,
             "items": created_items
         }
