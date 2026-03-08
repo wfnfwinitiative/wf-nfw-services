@@ -4,6 +4,9 @@ from sqlalchemy.sql import func
 from app.db.session import Base
 from app.core.config import settings
 
+# Import Status so that it gets registered in metadata before any ForeignKey references.
+from app.models.status_models import Status  # noqa: F401
+
 SCHEMA = settings.DB_SCHEMA
 
 
