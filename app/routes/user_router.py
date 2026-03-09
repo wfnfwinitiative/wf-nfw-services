@@ -16,14 +16,19 @@ async def create_user(payload: UserCreate, db: AsyncSession = Depends(get_db)):
     )
 
 
-@router.get("/{user_id}", response_model=UserRead)
-async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
-    return await UserService(db).get_user(user_id)
+@router.get("/get-drivers", response_model=list[UserRead])
+async def get_drivers(db: AsyncSession = Depends(get_db)):
+    return await UserService(db).get_drivers()
 
 
 @router.get("/", response_model=list[UserRead])
 async def get_all_users(db: AsyncSession = Depends(get_db)):
     return await UserService(db).get_all_users()
+
+
+@router.get("/{user_id}", response_model=UserRead)
+async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    return await UserService(db).get_user(user_id)
 
 
 @router.patch("/{user_id}")
