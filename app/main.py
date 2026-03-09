@@ -5,7 +5,22 @@ import logging
 import time
 
 from app.core.config import settings
-from app.routes import auth_router, health, user_router, role_router, user_role_router, feature_flag_router, vehicle_router, donor_router, hunger_spot_router, opportunity_router, opportunity_item_router, opportunity_event_router, opportunity_allocation_router
+
+# Import all models to register them with SQLAlchemy
+from app.models.user_models import User
+from app.models.role_models import Role
+from app.models.user_role_models import UserRole
+from app.models.vehicle_models import Vehicle
+from app.models.donor_models import Donor
+from app.models.hunger_spot_models import HungerSpot
+from app.models.status_models import Status
+from app.models.opportunity_models import Opportunity
+from app.models.opportunity_item_models import OpportunityItem
+from app.models.opportunity_allocation_models import OpportunityAllocation
+from app.models.opportunity_event_models import OpportunityEvent
+from app.models.feature_flag_models import FeatureFlag
+
+from app.routes import auth_router, health, user_router, role_router, user_role_router, feature_flag_router, vehicle_router, donor_router, hunger_spot_router, status_router, opportunity_router, opportunity_item_router, opportunity_event_router, opportunity_allocation_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -47,10 +62,12 @@ async def log_requests(request: Request, call_next):
 # -------------------------
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    import traceback
     logger.error(f"Unhandled error: {exc}")
+    logger.error(traceback.format_exc())
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal Server Error"},
+        content={"detail": traceback.format_exc()},
     )
 
 
@@ -76,6 +93,7 @@ app.include_router(feature_flag_router.router, prefix="/api")
 app.include_router(user_role_router.router, prefix="/api")
 app.include_router(donor_router.router, prefix="/api")
 app.include_router(hunger_spot_router.router, prefix="/api")
+app.include_router(status_router.router, prefix="/api")
 app.include_router(opportunity_router.router, prefix="/api")
 app.include_router(opportunity_event_router.router, prefix="/api")
 app.include_router(opportunity_allocation_router.router, prefix="/api")

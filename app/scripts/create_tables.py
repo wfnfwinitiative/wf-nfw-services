@@ -81,6 +81,8 @@ class Donor(Base):
     __table_args__ = {"schema": SCHEMA}
 
     donor_id = Column(BigInteger, Identity(), primary_key=True)
+    creator_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"))
+    
     donor_name = Column(String, nullable=False)
     city = Column(String)
     pincode = Column(String)
@@ -99,6 +101,8 @@ class HungerSpot(Base):
     __table_args__ = {"schema": SCHEMA}
 
     hunger_spot_id = Column(BigInteger, Identity(), primary_key=True)
+    creator_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"), nullable=False)
+    
     spot_name = Column(String, nullable=False)
     city = Column(String)
     pincode = Column(String)
@@ -119,6 +123,18 @@ class Status(Base):
 
     status_id = Column(SmallInteger, Identity(), primary_key=True)
     status_name = Column(String, unique=True, nullable=False)
+
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+
+class FeatureFlag(Base):
+    __tablename__ = "feature_flags"
+    __table_args__ = {"schema": SCHEMA}
+
+    id = Column(BigInteger, Identity(), primary_key=True)
+    feature_flag_name = Column(String, unique=True, nullable=False)
+    enabled = Column(Boolean, default=False, nullable=False)
 
     created_at = Column(TIMESTAMP, server_default=func.now())
     updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
@@ -219,9 +235,8 @@ class OpportunityEvent(Base):
 # ==========================
 
 async def recreate_tables():
-    async with AsyncSession(engine) as conn:
+    async with engine.begin() as conn:
         await conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS {SCHEMA}"))
-
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 

@@ -1,16 +1,15 @@
 import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.db.session import engine
-from app.schemas.schemas import Role
+from app.db.session import engine, SessionLocal
+from app.models.role_models import Role
 
 ROLES = ["ADMIN", "COORDINATOR", "DRIVER"]
 
 
 async def seed_roles():
-    async with AsyncSession(engine) as db:
+    async with SessionLocal() as db:
         for role_name in ROLES:
-
             result = await db.execute(select(Role).where(Role.role_name == role_name))
             existing = result.scalar_one_or_none()
 
