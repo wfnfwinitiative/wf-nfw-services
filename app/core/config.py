@@ -14,7 +14,13 @@ class Settings(BaseSettings):
     DB_SCHEMA: str = os.getenv("DB_SCHEMA", "wfnfw")
     DATABASE_URL: str = os.getenv("DATABASE_URL", "already configured in vecel environment variables")
     print(DATABASE_URL)
-
+    GOOGLE_DRIVE_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_FOLDER_ID", "")
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    GOOGLE_REDIRECT_URI: str = os.getenv("GOOGLE_REDIRECT_URI", "")
+    GOOGLE_REFRESH_TOKEN: str = os.getenv("GOOGLE_REFRESH_TOKEN", "")
+    GOOGLE_REFRESH_TOKEN: str = os.getenv("GOOGLE_REFRESH_TOKEN", "")
+    
     class Config:
         env_file = ".env"
 
