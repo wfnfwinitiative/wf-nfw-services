@@ -21,13 +21,17 @@ class UserRepository:
 
     async def get_by_id(self, user_id: int):
         result = await self.db.execute(
-            select(User).where(User.user_id == user_id)
+            select(User)
+            .options(selectinload(User.roles))
+            .where(User.user_id == user_id)
         )
         return result.scalar_one_or_none()
 
     async def get_by_mobile(self, mobile_number: str):
         result = await self.db.execute(
-            select(User).where(User.mobile_number == mobile_number)
+            select(User)
+            .options(selectinload(User.roles))
+            .where(User.mobile_number == mobile_number)
         )
         return result.scalar_one_or_none()
 

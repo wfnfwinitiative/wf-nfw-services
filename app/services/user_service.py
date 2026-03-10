@@ -26,20 +26,50 @@ class UserService:
 
         user = await self.repo.create(name, mobile_number, password_hash)
         await self.db.commit()
+
+        # Ensure the role assignment is persisted and the response can access it without
+        # triggering lazy-load after the session is closed.
         await self.user_role_repo.assign_role(user.user_id, role.role_id)
-        return user
+        await self.db.commit()
+
+        return {
+            "user_id": user.user_id,
+            "name": user.name,
+            "mobile_number": user.mobile_number,
+            "is_active": user.is_active,
+            "created_at": user.created_at,
+            "roles": [role.role_name],
+        }
 
     async def get_user(self, user_id: int):
         user = await self.repo.get_by_id(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        return user
+
+        # Return a plain dict so FastAPI/Pydantic doesn't try to lazy-load relationships
+        # after the DB session has been closed.
+        return {
+            "user_id": user.user_id,
+            "name": user.name,
+            "mobile_number": user.mobile_number,
+            "is_active": user.is_active,
+            "created_at": user.created_at,
+            "roles": [role.role_name for role in user.roles],
+        }
 
     async def get_user_by_mobile(self, phone_number: str):
         user = await self.repo.get_by_mobile(phone_number)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        return user
+
+        return {
+            "user_id": user.user_id,
+            "name": user.name,
+            "mobile_number": user.mobile_number,
+            "is_active": user.is_active,
+            "created_at": user.created_at,
+            "roles": [role.role_name for role in user.roles],
+        }
 
     async def get_all_users(self):
         users = await self.repo.get_all()
