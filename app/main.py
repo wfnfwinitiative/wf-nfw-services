@@ -5,7 +5,8 @@ import logging
 import time
 
 from app.core.config import settings
-from app.routes import auth_router, health, user_router, role_router, user_role_router, feature_flag_router, vehicle_router, donor_router, hunger_spot_router, opportunity_router, opportunity_item_router, opportunity_event_router, opportunity_allocation_router, opportunity_event_item_driver_router
+from app.routes import auth_router, health, user_router, role_router, user_role_router, feature_flag_router, vehicle_router, donor_router, hunger_spot_router, opportunity_router, opportunity_item_router, opportunity_event_router, opportunity_allocation_router, opportunity_event_item_driver_router, google_drive_router
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version="0.1.0",
@@ -79,6 +80,7 @@ app.include_router(opportunity_router.router, prefix="/api")
 app.include_router(opportunity_event_router.router, prefix="/api")
 app.include_router(opportunity_allocation_router.router, prefix="/api")
 app.include_router(vehicle_router.router, prefix="/api")
+app.include_router(google_drive_router.router, prefix="/api")
 app.include_router(opportunity_event_item_driver_router.router, prefix="/api")
 
 
