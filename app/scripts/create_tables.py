@@ -144,16 +144,16 @@ class Opportunity(Base):
     assignee_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"))
 
     feeding_count = Column(Integer)
-    pickup_eta = Column(TIMESTAMP)
-    delivery_by = Column(TIMESTAMP)
-    start_time = Column(TIMESTAMP)
-    end_time = Column(TIMESTAMP)
+    pickup_eta = Column(TIMESTAMP(timezone=True))
+    delivery_by = Column(TIMESTAMP(timezone=True))
+    start_time = Column(TIMESTAMP(timezone=True))
+    end_time = Column(TIMESTAMP(timezone=True))
 
     notes = Column(Text)
     image_link = Column(String)
 
-    created_at = Column(TIMESTAMP, server_default=func.now())
-    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
 class OpportunityItem(Base):

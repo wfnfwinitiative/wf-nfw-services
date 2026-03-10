@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.user_models import User
+from sqlalchemy.orm import selectinload
 from app.models.user_role_models import UserRole
 
 
@@ -31,7 +32,9 @@ class UserRepository:
         return result.scalar_one_or_none()
 
     async def get_all(self):
-        result = await self.db.execute(select(User))
+        result = await self.db.execute(
+            select(User).options(selectinload(User.roles))
+        )
         return result.scalars().all()
 
     async def get_by_role(self, role_id: int):

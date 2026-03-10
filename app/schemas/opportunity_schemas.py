@@ -12,7 +12,6 @@ class OpportunityCreate(BaseModel):
     donor_id: int
     hunger_spot_id: int
     status_id: int
-    creator_id: int
     driver_id: Optional[int]
     vehicle_id: Optional[int]
     feeding_count: Optional[int] = 0

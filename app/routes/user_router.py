@@ -8,11 +8,12 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.post("/", response_model=UserRead)
-async def create_user(payload: UserCreate, db: AsyncSession = Depends(get_db)):
-    return await UserService(db).create_user(
+async def create_user_with_role(payload: UserCreate, db: AsyncSession = Depends(get_db)):
+    return await UserService(db).create_user_with_role(
         name=payload.name,
         mobile_number=payload.mobile_number,
-        password=payload.password
+        password=payload.password,
+        role_name=payload.role_name
     )
 
 
