@@ -54,12 +54,32 @@ class UserService:
             }
             for user in users
         ]
-
     async def get_users_by_role(self, role_name: str):
-        role = await self.role_repo.get_by_name(role_name)
-        if not role:
-            raise HTTPException(status_code=404, detail="Role not found")
-        return await self.repo.get_by_role(role.role_id)
+        users = await self.repo.get_by_role_name(role_name)
+        return [
+            {
+                "user_id": user.user_id,
+                "name": user.name,
+                "mobile_number": user.mobile_number,
+                "is_active": user.is_active,
+                "created_at": user.created_at,
+                "roles": [role.role_name for role in user.roles]
+            }
+            for user in users
+        ]
+    async def get_users_by_role(self, role_name: str):
+        users = await self.repo.get_by_role_name(role_name)
+        return [
+            {
+                "user_id": user.user_id,
+                "name": user.name,
+                "mobile_number": user.mobile_number,
+                "is_active": user.is_active,
+                "created_at": user.created_at,
+                "roles": [role.role_name for role in user.roles]
+            }
+            for user in users
+        ]
 
     async def deactivate_user(self, user_id: int):
         user = await self.repo.deactivate(user_id)

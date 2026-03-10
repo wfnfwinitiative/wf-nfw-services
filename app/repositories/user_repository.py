@@ -37,11 +37,10 @@ class UserRepository:
         )
         return result.scalars().all()
 
-    async def get_by_role(self, role_id: int):
+    async def get_by_role_name(self, role_name: str):
+        from app.models.role_models import Role
         result = await self.db.execute(
-            select(User)
-            .join(UserRole, User.user_id == UserRole.user_id)
-            .where(UserRole.role_id == role_id)
+            select(User).join(UserRole).join(Role).where(Role.role_name == role_name).options(selectinload(User.roles))
         )
         return result.scalars().all()
 
