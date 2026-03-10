@@ -7,6 +7,10 @@ from sqlalchemy.sql import func
 from app.db.session import Base
 from app.core.config import settings
 
+# Importing the Status model ensures it is registered in metadata
+# before Opportunity defines a ForeignKey to it.
+from app.models.status_models import Status  # noqa: F401
+
 SCHEMA = settings.DB_SCHEMA
 
 
@@ -27,13 +31,13 @@ class Opportunity(Base):
     assignee_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"))
 
     feeding_count = Column(Integer)
-    pickup_eta = Column(TIMESTAMP)
-    delivery_by = Column(TIMESTAMP)
-    start_time = Column(TIMESTAMP)
-    end_time = Column(TIMESTAMP)
+    pickup_eta = Column(TIMESTAMP(timezone=True))
+    delivery_by = Column(TIMESTAMP(timezone=True))
+    start_time = Column(TIMESTAMP(timezone=True))
+    end_time = Column(TIMESTAMP(timezone=True))
 
     notes = Column(Text)
     image_link = Column(String(255))
 
-    created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
-    updated_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)

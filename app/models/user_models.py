@@ -1,5 +1,6 @@
 from sqlalchemy import Column, BigInteger, String, Boolean, TIMESTAMP
 from sqlalchemy.schema import Identity
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.session import Base
 from app.core.config import settings
@@ -17,3 +18,10 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
+
+    roles = relationship(
+        "Role",
+        secondary=f"{SCHEMA}.user_roles",
+        back_populates="users",
+        lazy="selectin"
+    )

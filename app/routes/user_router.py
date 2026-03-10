@@ -8,11 +8,12 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.post("/", response_model=UserRead)
-async def create_user(payload: UserCreate, db: AsyncSession = Depends(get_db)):
-    return await UserService(db).create_user(
+async def create_user_with_role(payload: UserCreate, db: AsyncSession = Depends(get_db)):
+    return await UserService(db).create_user_with_role(
         name=payload.name,
         mobile_number=payload.mobile_number,
-        password=payload.password
+        password=payload.password,
+        role_name=payload.role_name
     )
 
 
@@ -24,6 +25,11 @@ async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
 @router.get("/", response_model=list[UserRead])
 async def get_all_users(db: AsyncSession = Depends(get_db)):
     return await UserService(db).get_all_users()
+
+
+@router.get("/role/{role_name}", response_model=list[UserRead])
+async def get_users_by_role(role_name: str, db: AsyncSession = Depends(get_db)):
+    return await UserService(db).get_users_by_role(role_name)
 
 
 @router.patch("/{user_id}")
