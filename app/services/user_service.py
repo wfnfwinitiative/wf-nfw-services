@@ -55,6 +55,12 @@ class UserService:
             for user in users
         ]
 
+    async def get_users_by_role(self, role_name: str):
+        role = await self.role_repo.get_by_name(role_name)
+        if not role:
+            raise HTTPException(status_code=404, detail="Role not found")
+        return await self.repo.get_by_role(role.role_id)
+
     async def deactivate_user(self, user_id: int):
         user = await self.repo.deactivate(user_id)
         if not user:

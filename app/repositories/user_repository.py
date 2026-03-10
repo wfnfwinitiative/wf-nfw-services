@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.user_models import User
 from sqlalchemy.orm import selectinload
+from app.models.user_role_models import UserRole
 
 
 class UserRepository:
@@ -33,6 +34,14 @@ class UserRepository:
     async def get_all(self):
         result = await self.db.execute(
             select(User).options(selectinload(User.roles))
+        )
+        return result.scalars().all()
+
+    async def get_by_role(self, role_id: int):
+        result = await self.db.execute(
+            select(User)
+            .join(UserRole, User.user_id == UserRole.user_id)
+            .where(UserRole.role_id == role_id)
         )
         return result.scalars().all()
 
