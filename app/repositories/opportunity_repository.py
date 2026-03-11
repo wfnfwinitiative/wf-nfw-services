@@ -120,6 +120,8 @@ class OpportunityRepository:
                 'end_time': row.end_time,
                 'notes': row.notes,
                 'image_link': row.image_link,
+                'pickup_folder_id': row.pickup_folder_id,
+                'deliver_folder_id': row.deliver_folder_id,
                 'pickup_location': row.pickup_location,
                 'pickup_contact_no': row.pickup_contact_no,
                 'drop_location': row.drop_location,
