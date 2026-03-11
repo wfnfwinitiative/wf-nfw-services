@@ -39,5 +39,8 @@ class Opportunity(Base):
     notes = Column(Text)
     image_link = Column(String(255))
 
+    pickup_folder_id = Column(String(255))
+    delivery_folder_id = Column(String(255))
+
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), nullable=False)
