@@ -35,6 +35,8 @@ class OpportunityRead(OpportunityBaseSchema):
     end_time: Optional[datetime]
     notes: Optional[str]
     image_link: Optional[str]
+    pickup_folder_id: Optional[str]
+    delivery_folder_id: Optional[str]
     created_at: datetime
     updated_at: datetime
 
@@ -49,6 +51,8 @@ class OpportunityUpdate(BaseModel):
     delivery_by: Optional[datetime] = None
     notes: Optional[str] = None
     image_link: Optional[str] = None
+    pickup_folder_id: Optional[str]
+    delivery_folder_id: Optional[str]
     start_time: Optional[datetime]
     end_time: Optional[datetime]
 
@@ -72,6 +76,8 @@ class OpportunityDetailedRead(OpportunityBaseSchema):
     end_time: Optional[datetime]
     notes: Optional[str]
     image_link: Optional[str]
+    pickup_folder_id: Optional[str]
+    delivery_folder_id: Optional[str]
     pickup_location: Optional[str]
     pickup_contact_no: Optional[str]
     drop_location: Optional[str]
