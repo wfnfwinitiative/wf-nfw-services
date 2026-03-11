@@ -67,6 +67,8 @@ class OpportunityRepository:
                 Opportunity.end_time,
                 Opportunity.notes,
                 Opportunity.image_link,
+                Opportunity.pickup_folder_id,
+                Opportunity.delivery_folder_id,
                 Opportunity.created_at,
                 Opportunity.updated_at,
                 Donor.donor_name,
