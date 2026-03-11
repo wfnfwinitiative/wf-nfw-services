@@ -22,6 +22,9 @@ class OpportunityService:
     async def get_all_opportunities(self):
         return await self.repo.get_all()
 
+    async def get_opportunities_by_driver_id(self, driver_id: int):
+        return await self.repo.get_by_driver_id(driver_id)
+
     async def update_opportunity(self, opportunity_id: int, **data):
         obj = await self.repo.update(opportunity_id, **data)
         if not obj:

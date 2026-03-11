@@ -40,3 +40,11 @@ class OpportunityRepository:
             await self.db.flush()
             return True
         return False
+    
+    async def get_by_driver_id(self, driver_id: int):
+        result = await self.db.execute(
+            select(Opportunity).where(
+                Opportunity.driver_id == driver_id
+            )
+        )
+        return result.scalars().all()
