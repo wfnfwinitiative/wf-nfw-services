@@ -1,7 +1,13 @@
 # google_drive_router.py
 import logging
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Request
+import os
+import tempfile
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Request, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.session import get_db
 from app.repositories.google_drive_repository import GoogleDriveRepository
+from app.services.opportunity_service import OpportunityService
 
 logger = logging.getLogger(__name__)
 
@@ -9,33 +15,74 @@ router = APIRouter()
 drive_repo = GoogleDriveRepository()
 
 @router.post('/upload-image')
-def upload_image(
+async def upload_image(
     file: UploadFile = File(...),
     upload_type: str = Form('pickup'),
     driver_name: str = Form('Driver'),
     opportunity_id: str = Form(''),
+    db: AsyncSession = Depends(get_db),
 ):
+    """Upload image to Google Drive using stored refresh token from env.
+
+    If an opportunity ID is provided, we attempt to store/reuse the Drive folder
+    ID in the opportunity record (pickup_folder_id or delivery_folder_id).
     """
-    Upload image to Google Drive using stored refresh token from env.
-    Creates folder structure: Parent(Opp+Driver+Date) > Subfolder(Pickup/Deliver+Date+Driver)
-    """
-    import os
-    import tempfile
+
+    if upload_type not in {"pickup", "delivery"}:
+        raise HTTPException(status_code=400, detail="upload_type must be either 'pickup' or 'delivery'")
+
+    folder_field = None
+    existing_folder_id = None
+    opportunity_obj = None
+
+    if opportunity_id:
+        try:
+            opportunity_obj = await OpportunityService(db).get_opportunity(int(opportunity_id))
+            if upload_type == 'pickup':
+                folder_field = 'pickup_folder_id'
+            elif upload_type == 'delivery':
+                folder_field = 'delivery_folder_id'
+
+            if folder_field:
+                existing_folder_id = getattr(opportunity_obj, folder_field)
+        except Exception:
+            # If the provided opportunity_id is invalid or missing, continue without persistence
+            opportunity_obj = None
+            existing_folder_id = None
+
     temp_path = None
     try:
         suffix = os.path.splitext(file.filename)[1] if file.filename else ''
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(file.file.read())
             temp_path = tmp.name
+
         logger.info(f"Uploading '{file.filename}' | type={upload_type} | driver={driver_name} | opp={opportunity_id}")
-        result = drive_repo.validate_and_upload(temp_path, file.filename, upload_type, driver_name, opportunity_id) # type: ignore
-        return {"success": True, "file": result}
+
+        result = drive_repo.validate_and_upload(
+            temp_path,
+            file.filename,
+            upload_type,
+            driver_name,
+            opportunity_id,
+            existing_folder_id=existing_folder_id,
+        )
+
+        # Persist folder id for future uploads if we just created it
+        if opportunity_obj and folder_field and not existing_folder_id:
+            folder_id = result.get('folder_id')
+            if folder_id:
+                await OpportunityService(db).update_opportunity(
+                    opportunity_obj.opportunity_id,
+                    **{folder_field: folder_id},
+                )
+
+        return {"success": True, "file": result.get("file"), "folder_id": result.get("folder_id")}
     except Exception as e:
         logger.error(f"Upload failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         try:
-            import os
             if temp_path and os.path.exists(temp_path):
                 os.remove(temp_path)
         except Exception:

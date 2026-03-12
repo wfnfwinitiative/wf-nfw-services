@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.schemas.opportunity_schemas import (
     OpportunityCreate,
+    OpportunityDetailedRead,
     OpportunityRead,
     OpportunityUpdate,
 )
@@ -32,6 +33,11 @@ async def get_opportunities(db: AsyncSession = Depends(get_db)):
 @router.get("/{opportunity_id}", response_model=OpportunityRead)
 async def get_opportunity(opportunity_id: int, db: AsyncSession = Depends(get_db)):
     return await OpportunityService(db).get_opportunity(opportunity_id)
+
+
+@router.get("/driver/{driver_id}", response_model=list[OpportunityDetailedRead])
+async def get_opportunities_by_driver_id(driver_id: int, db: AsyncSession = Depends(get_db)):
+    return await OpportunityService(db).get_opportunities_by_driver_id(driver_id)
 
 
 @router.patch("/{opportunity_id}", response_model=OpportunityRead)

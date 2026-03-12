@@ -3,6 +3,7 @@
 Repository to handle Google Drive OAuth and image upload.
 """
 import json
+import re
 import logging
 import requests
 from datetime import datetime
@@ -126,14 +127,24 @@ class GoogleDriveRepository:
             logger.error(f"Failed to upload image '{file_name}': {e}", exc_info=True)
             raise
 
-    def validate_and_upload(self, file_path: str, file_name: str, upload_type: str = 'pickup',
-                            driver_name: str = 'Driver', opportunity_id: str = '') -> dict:
-        """
-        Orchestrate the full upload flow:
-        1. Refresh access token
-        2. Find/create parent folder  (Opp{id}_{driver}_{date})
-        3. Find/create subfolder      (Pickup/Deliver_{date}_{driver})
-        4. Upload the image into the subfolder
+    def validate_and_upload(
+        self,
+        file_path: str,
+        file_name: str,
+        upload_type: str = 'pickup',
+        driver_name: str = 'Driver',
+        opportunity_id: str = '',
+        existing_folder_id: str | None = None,
+    ) -> dict:
+        """Orchestrate the full upload flow.
+
+        If an existing Drive folder ID is provided, we use it directly.
+        Otherwise, we create a deterministic folder path:
+          Parent: Opp{opportunity_id}_{driver}
+          Child: Pickup or Delivery
+
+        This makes it possible to store the folder id in the database and
+        reuse it on subsequent uploads.
         """
         if not self.refresh_token:
             raise Exception("GOOGLE_REFRESH_TOKEN is not set. Admin must complete OAuth flow first.")
@@ -147,23 +158,28 @@ class GoogleDriveRepository:
             session = self._drive_session(access_token)
 
             today = datetime.now().strftime('%Y-%m-%d')
-            safe_driver = driver_name.replace(' ', '_')
 
-            parent_name = (
-                f"Opp{opportunity_id}_{safe_driver}_{today}"
-                if opportunity_id else
-                f"{safe_driver}_{today}"
-            )
-            logger.info(f"Creating/finding parent folder: {parent_name}")
-            parent_id = self.get_or_create_folder(parent_name, self.root_folder_id, session)
+            # If caller already has a Drive folder ID saved, use it directly.
+            if existing_folder_id:
+                logger.info(f"Using existing Drive folder id: {existing_folder_id}")
+                target_folder_id = existing_folder_id
+            else:
+                clean_driver = re.sub(r"\s+", "_", driver_name.strip())
+                parent_name = f"{opportunity_id}_{clean_driver}_{today}"
+                logger.info(f"Creating/finding parent folder: {parent_name}")
+                parent_id = self.get_or_create_folder(parent_name, self.root_folder_id, session)
 
-            type_label = 'Pickup' if upload_type == 'pickup' else 'Deliver'
-            subfolder_name = f"{type_label}_{today}_{safe_driver}"
-            logger.info(f"Creating/finding subfolder: {subfolder_name}")
-            subfolder_id = self.get_or_create_folder(subfolder_name, parent_id, session)
+                child_name =  upload_type.title()
 
-            logger.info(f"Uploading '{file_name}' to folder '{subfolder_name}' (id={subfolder_id})")
-            return self.upload_image(session, file_path, file_name, subfolder_id)
+                logger.info(f"Creating/finding subfolder: {child_name}")
+                target_folder_id = self.get_or_create_folder(child_name, parent_id, session)
+
+            logger.info(f"Uploading '{file_name}' to folder id={target_folder_id}")
+            file_response = self.upload_image(session, file_path, file_name, target_folder_id)
+            return {
+                "file": file_response,
+                "folder_id": target_folder_id,
+            }
         except Exception as e:
             logger.error(f"validate_and_upload failed for '{file_name}': {e}", exc_info=True)
             raise
