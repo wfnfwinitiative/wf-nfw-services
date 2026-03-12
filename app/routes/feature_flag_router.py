@@ -54,7 +54,7 @@ async def get_feature_flag_by_name(
 # ============================================
 # UPDATE FEATURE FLAG
 # ============================================
-@router.put("/{feature_flag_name}", response_model=FeatureFlagRead)
+@router.patch("/{feature_flag_name}", response_model=FeatureFlagRead)
 async def update_feature_flag(
     feature_flag_name: str,
     data: FeatureFlagUpdate,
