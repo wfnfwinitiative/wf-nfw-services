@@ -84,3 +84,7 @@ class OpportunityDetailedRead(OpportunityBaseSchema):
     drop_location_contact_no: Optional[str]
     created_at: datetime
     updated_at: datetime
+    previous_status_id: Optional[int]
+    previous_status_name: Optional[str]
+    new_status_id: Optional[int]
+    new_status_name: Optional[str]

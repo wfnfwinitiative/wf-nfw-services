@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, join
 from sqlalchemy.orm import aliased
 from app.models.opportunity_models import Opportunity
+from app.models.opportunity_event_models import OpportunityEvent   # ✅ added
 from app.models.donor_models import Donor
 from app.models.status_models import Status
 from app.models.user_models import User
@@ -48,10 +49,14 @@ class OpportunityRepository:
         return False
     
     async def get_by_driver_id(self, driver_id: int):
-        # Create aliases for the multiple User relationships
+
         creator_user = aliased(User)
         driver_user = aliased(User)
-        
+
+        # ✅ added status aliases
+        previous_status = aliased(Status)
+        new_status = aliased(Status)
+
         result = await self.db.execute(
             select(
                 Opportunity.opportunity_id,
@@ -80,24 +85,53 @@ class OpportunityRepository:
                 Vehicle.vehicle_no.label('vehicle_name'),
                 HungerSpot.location.label('drop_location'),
                 HungerSpot.mobile_number.label('drop_location_contact_no'),
-            ).join(
+
+               
+                previous_status.status_id.label("previous_status_id"),
+                previous_status.status_name.label("previous_status_name"),
+                new_status.status_id.label("new_status_id"),
+                new_status.status_name.label("new_status_name"),
+            )
+            .join(
                 Donor, Opportunity.donor_id == Donor.donor_id
-            ).join(
+            )
+            .join(
                 Status, Opportunity.status_id == Status.status_id
-            ).join(
+            )
+            .join(
                 creator_user, Opportunity.creator_id == creator_user.user_id
-            ).outerjoin(
+            )
+            .outerjoin(
                 driver_user, Opportunity.driver_id == driver_user.user_id
-            ).outerjoin(
+            )
+            .outerjoin(
                 Vehicle, Opportunity.vehicle_id == Vehicle.vehicle_id
-            ).outerjoin(
+            )
+            .outerjoin(
                 HungerSpot, Opportunity.hunger_spot_id == HungerSpot.hunger_spot_id
-            ).where(
+            )
+
+           
+            .outerjoin(
+                OpportunityEvent,
+                Opportunity.opportunity_id == OpportunityEvent.opportunity_id
+            )
+
+            
+            .outerjoin(
+                previous_status,
+                OpportunityEvent.previous_status_id == previous_status.status_id
+            )
+            .outerjoin(
+                new_status,
+                OpportunityEvent.new_status_id == new_status.status_id
+            )
+
+            .where(
                 Opportunity.driver_id == driver_id
             )
         )
         
-        # Convert rows to dictionaries that match OpportunityReadTest
         opportunities = []
         for row in result:
             opportunities.append({
@@ -127,6 +161,11 @@ class OpportunityRepository:
                 'drop_location': row.drop_location,
                 'drop_location_contact_no': row.drop_location_contact_no,
                 'created_at': row.created_at,
-                'updated_at': row.updated_at,
+                'updated_at': row.updated_at,              
+                'previous_status_id': row.previous_status_id,
+                'previous_status_name': row.previous_status_name,
+                'new_status_id': row.new_status_id,
+                'new_status_name': row.new_status_name,
             })
+
         return opportunities
