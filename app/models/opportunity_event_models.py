@@ -17,11 +17,9 @@ class OpportunityEvent(Base):
     opportunity_event_id = Column(BigInteger, Identity(), primary_key=True)
     opportunity_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.opportunities.opportunity_id"), nullable=False)
 
-    event_type = Column(String(50), nullable=False)
-
     previous_status_id = Column(SmallInteger, ForeignKey(f"{SCHEMA}.statuses.status_id"))
     new_status_id = Column(SmallInteger, ForeignKey(f"{SCHEMA}.statuses.status_id"))
 
     event_time = Column(TIMESTAMP, server_default=func.now(), nullable=False)
-    actor_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"))
+    creator_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"))
     notes = Column(Text)

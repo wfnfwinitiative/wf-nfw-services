@@ -82,33 +82,6 @@ async def apply_changes():
         """))
 
         # ==========================
-        # ENUM TYPE (Safe)
-        # ==========================
-
-        await conn.execute(text(f"""
-        DO $$
-        BEGIN
-            IF NOT EXISTS (
-                SELECT 1 FROM pg_type WHERE typname = 'event_type_enum'
-            ) THEN
-                CREATE TYPE {SCHEMA}.event_type_enum AS ENUM (
-                    'CREATED',
-                    'STATUS_CHANGED',
-                    'UPDATED',
-                    'DELETED'
-                );
-            END IF;
-        END$$;
-        """))
-
-        await conn.execute(text(f"""
-        ALTER TABLE {SCHEMA}.opportunity_events
-        ALTER COLUMN event_type
-        TYPE {SCHEMA}.event_type_enum
-        USING event_type::text::{SCHEMA}.event_type_enum;
-        """))
-
-        # ==========================
         # INDEXES (Safe)
         # ==========================
 
