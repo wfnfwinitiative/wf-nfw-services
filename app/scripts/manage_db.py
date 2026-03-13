@@ -30,34 +30,34 @@ SCHEMA = settings.DB_SCHEMA
 
 
 async def full_reset():
-    print("🔄 Starting full database reset...")
+    print("Starting full database reset...")
 
     async with engine.begin() as conn:
-        print(f"🗑️  Dropping schema '{SCHEMA}' with CASCADE...")
+        print(f"Dropping schema '{SCHEMA}' with CASCADE...")
         await conn.execute(text(f"DROP SCHEMA IF EXISTS {SCHEMA} CASCADE"))
 
-        print(f"📁 Creating schema '{SCHEMA}'...")
+        print(f"Creating schema '{SCHEMA}'...")
         await conn.execute(text(f"CREATE SCHEMA {SCHEMA}"))
 
-        print("🏗️  Creating tables one by one...")
+        print("Creating tables one by one...")
         for table in Base.metadata.sorted_tables:
             print(f"   → Creating table: {table.schema}.{table.name}")
             await conn.run_sync(lambda sync_session: table.create(bind=sync_session))
 
-    print("♻️  Disposing engine to clear caches...")
+    print("Disposing engine to clear caches...")
     await engine.dispose()
 
-    print("🔧 Applying constraints and indexes...")
+    print("Applying constraints and indexes...")
     await apply_changes()
 
-    print("♻️  Disposing engine again before seeding...")
+    print("Disposing engine again before seeding...")
     await engine.dispose()
 
-    print("🌱 Seeding lookup tables...")
+    print("Seeding lookup tables...")
     await seed_roles()
     await seed_statuses()
 
-    print("✅ Database dropped, recreated, hardened, and seeded successfully!")
+    print("Database dropped, recreated, hardened, and seeded successfully!")
 
 
 if __name__ == "__main__":
