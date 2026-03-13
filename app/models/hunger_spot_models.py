@@ -30,8 +30,6 @@ class HungerSpot(Base):
     mobile_number = Column(String(15))
     address = Column(String(255))
     location = Column(String(255))
-    latitude = Column(Numeric(10, 8), nullable=True)
-    longitude = Column(Numeric(11, 8), nullable=True)
     capacity_meals = Column(Integer)
     is_active = Column(Boolean, default=True, nullable=False)
 
