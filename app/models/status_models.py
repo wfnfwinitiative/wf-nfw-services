@@ -14,6 +14,4 @@ class Status(Base):
 
     status_id = Column(SmallInteger, Identity(), primary_key=True)
     status_name = Column(String, unique=True, nullable=False)
-
-    created_at = Column(TIMESTAMP, server_default=func.now())
-    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    status_info = Column(String, nullable=False)

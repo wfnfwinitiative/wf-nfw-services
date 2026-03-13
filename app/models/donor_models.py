@@ -5,6 +5,7 @@ from sqlalchemy import (
     Boolean,
     TIMESTAMP,
     ForeignKey,
+    Numeric,
 )
 from sqlalchemy.schema import Identity
 from sqlalchemy.sql import func
@@ -28,6 +29,8 @@ class Donor(Base):
     mobile_number = Column(String(15))
     address = Column(String(255))
     location = Column(String(255))
+    latitude = Column(Numeric(10, 8), nullable=True)
+    longitude = Column(Numeric(11, 8), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
