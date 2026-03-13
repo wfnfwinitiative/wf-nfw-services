@@ -29,6 +29,6 @@ class AuthService:
 
         # 4️⃣ Create token with role
         print(user.user_id, user_roles)
-        token = create_access_token(user_id=user.user_id, role=user_roles)
+        token = create_access_token(user_id=user.user_id, role=user_roles, name=user.name)
 
         return token
