@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     # DB_HOST: str = os.getenv("DB_HOST")
     DB_SCHEMA: str = os.getenv("DB_SCHEMA", "wfnfw")
     DATABASE_URL: str = os.getenv(
-        "DATABASE_URL", DATABASE_URL
+        "DATABASE_URL", ""
     )
     print(DATABASE_URL)
     GOOGLE_DRIVE_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_FOLDER_ID", "")
