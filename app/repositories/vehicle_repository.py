@@ -37,3 +37,11 @@ class VehicleRepository:
             await self.db.flush()
             return True
         return False
+
+    async def update(self, vehicle_id: int, **kwargs):
+        vehicle = await self.get_by_id(vehicle_id)
+        if vehicle:
+            for key, value in kwargs.items():
+                setattr(vehicle, key, value)
+            await self.db.flush()
+        return vehicle

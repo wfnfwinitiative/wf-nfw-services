@@ -19,7 +19,10 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
     GOOGLE_REDIRECT_URI: str = os.getenv("GOOGLE_REDIRECT_URI", "")
     GOOGLE_REFRESH_TOKEN: str = os.getenv("GOOGLE_REFRESH_TOKEN", "")
-    GOOGLE_REFRESH_TOKEN: str = os.getenv("GOOGLE_REFRESH_TOKEN", "")
+
+    # Breakglass (emergency admin bootstrap)
+    BREAKGLASS_MOBILE: str = os.getenv("BREAKGLASS_MOBILE", "0000000000")
+    BREAKGLASS_PASSWORD_HASH: str = os.getenv("BREAKGLASS_PASSWORD_HASH", "")
 
     # Google API endpoint URLs — fixed by Google, centralised here for consistency
     GOOGLE_DRIVE_FILES_URL: str = "https://www.googleapis.com/drive/v3/files"
