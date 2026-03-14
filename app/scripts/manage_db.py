@@ -24,6 +24,7 @@ from app.models import (
 # bring in existing helpers (keeping single-seed logic centralized)
 from app.scripts.seed_roles import seed_roles
 from app.scripts.seed_statuses import seed_statuses
+from app.scripts.seed_feature_flags import seed_feature_flags
 from app.scripts.db_constraints import apply_changes
 
 SCHEMA = settings.DB_SCHEMA
@@ -56,6 +57,7 @@ async def full_reset():
     print("Seeding lookup tables...")
     await seed_roles()
     await seed_statuses()
+    await seed_feature_flags()
 
     print("Database dropped, recreated, hardened, and seeded successfully!")
 

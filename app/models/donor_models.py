@@ -12,6 +12,7 @@ from sqlalchemy.sql import func
 from app.core.config import settings
 
 from app.db.session import Base
+
 SCHEMA = settings.DB_SCHEMA
 
 

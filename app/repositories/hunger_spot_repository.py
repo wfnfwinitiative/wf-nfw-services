@@ -17,8 +17,10 @@ class HungerSpotRepository:
         mobile_number: str = None,
         address: str = None,
         location: str = None,
+        latitude: float = None,
+        longitude: float = None,
         capacity_meals: int = None,
-        is_active: bool = True
+        is_active: bool = True,
     ) -> HungerSpot:
         params = {
             "spot_name": spot_name,
@@ -28,6 +30,8 @@ class HungerSpotRepository:
             "mobile_number": mobile_number,
             "address": address,
             "location": location,
+            "latitude": latitude,
+            "longitude": longitude,
             "capacity_meals": capacity_meals,
             "is_active": is_active,
         }

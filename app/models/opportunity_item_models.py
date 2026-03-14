@@ -11,7 +11,9 @@ class OpportunityItem(Base):
     __table_args__ = {"schema": SCHEMA}
 
     opportunity_item_id = Column(BigInteger, Identity(), primary_key=True)
-    opportunity_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.opportunities.opportunity_id"), nullable=False)
+    opportunity_id = Column(
+        BigInteger, ForeignKey(f"{SCHEMA}.opportunities.opportunity_id"), nullable=False
+    )
 
     food_name = Column(String(100), nullable=False)
     quality = Column(String(100))

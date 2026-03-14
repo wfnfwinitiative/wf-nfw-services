@@ -12,7 +12,6 @@ from app.services.opportunity_event_item_driver_service import (
     OpportunityEventItemDriverService,
 )
 
-
 router = APIRouter(
     prefix="/opportunity-event-items-driver",
     tags=["Opportunity Event Item Driver"],

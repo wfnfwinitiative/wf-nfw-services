@@ -1,6 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.repositories.opportunity_allocation_repository import OpportunityAllocationRepository
+from app.repositories.opportunity_allocation_repository import (
+    OpportunityAllocationRepository,
+)
 
 
 class OpportunityAllocationService:

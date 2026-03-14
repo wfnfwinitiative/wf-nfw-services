@@ -20,6 +20,7 @@ SCHEMA = settings.DB_SCHEMA
 # FEATURE FLAGS
 # ==============================
 
+
 class FeatureFlag(Base):
     __tablename__ = "feature_flags"
     __table_args__ = {"schema": SCHEMA}

@@ -1,12 +1,11 @@
-
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-
 # =====================================================
 # BASE CONFIG
 # =====================================================
+
 
 class FeatureFlagBaseSchema(BaseModel):
     class Config:
@@ -16,6 +15,7 @@ class FeatureFlagBaseSchema(BaseModel):
 # =====================================================
 # FEATURE FLAGS
 # =====================================================
+
 
 class FeatureFlagCreate(BaseModel):
     feature_flag_name: str

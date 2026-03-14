@@ -4,15 +4,19 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "No Food Waste"
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "set it up in vecel environment variables")
+    SECRET_KEY: str = os.getenv(
+        "SECRET_KEY", "set it up in vecel environment variables"
+    )
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ALGORITHM: str = "HS256"
 
-    #DB_USERNAME: str = os.getenv("DB_USERNAME")
-    #DB_PASSWORD: str = os.getenv("DB_PASSWORD")
-    #DB_HOST: str = os.getenv("DB_HOST")
+    # DB_USERNAME: str = os.getenv("DB_USERNAME")
+    # DB_PASSWORD: str = os.getenv("DB_PASSWORD")
+    # DB_HOST: str = os.getenv("DB_HOST")
     DB_SCHEMA: str = os.getenv("DB_SCHEMA", "wfnfw")
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "already configured in vecel environment variables")
+    DATABASE_URL: str = os.getenv(
+        "DATABASE_URL", "already configured in vecel environment variables"
+    )
     print(DATABASE_URL)
     GOOGLE_DRIVE_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_FOLDER_ID", "")
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
@@ -26,9 +30,11 @@ class Settings(BaseSettings):
 
     # Google API endpoint URLs — fixed by Google, centralised here for consistency
     GOOGLE_DRIVE_FILES_URL: str = "https://www.googleapis.com/drive/v3/files"
-    GOOGLE_DRIVE_UPLOAD_URL: str = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart"
+    GOOGLE_DRIVE_UPLOAD_URL: str = (
+        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart"
+    )
     GOOGLE_DRIVE_TOKEN_URL: str = "https://oauth2.googleapis.com/token"
-    
+
     class Config:
         env_file = ".env"
 

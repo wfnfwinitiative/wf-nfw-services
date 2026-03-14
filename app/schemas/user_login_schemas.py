@@ -15,6 +15,7 @@ class TokenResponse(BaseModel):
 # USERS
 # =====================================================
 
+
 class AdminCreateUser(BaseModel):
     name: str
     mobile_number: str

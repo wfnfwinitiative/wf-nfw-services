@@ -25,8 +25,7 @@ class UserRoleRepository:
     async def remove_role(self, user_id: int, role_id: int):
         result = await self.db.execute(
             select(UserRole).where(
-                UserRole.user_id == user_id,
-                UserRole.role_id == role_id
+                UserRole.user_id == user_id, UserRole.role_id == role_id
             )
         )
         obj = result.scalar_one_or_none()

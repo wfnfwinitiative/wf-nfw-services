@@ -9,7 +9,9 @@ class FeatureFlagService:
         self.repository = FeatureFlagRepository(db)
         self.db = db
 
-    async def create_feature_flag(self, feature_flag_name: str, enabled: bool = False) -> FeatureFlag:
+    async def create_feature_flag(
+        self, feature_flag_name: str, enabled: bool = False
+    ) -> FeatureFlag:
         """Create a new feature flag"""
         # Check if flag already exists
         existing_flag = await self.repository.get_by_name(feature_flag_name)
@@ -38,7 +40,9 @@ class FeatureFlagService:
         """Get all feature flags"""
         return await self.repository.get_all()
 
-    async def update_feature_flag(self, feature_flag_name: str, enabled: bool) -> FeatureFlag:
+    async def update_feature_flag(
+        self, feature_flag_name: str, enabled: bool
+    ) -> FeatureFlag:
         """Update feature flag enabled status by name"""
         flag = await self.repository.get_by_name(feature_flag_name)
         if not flag:

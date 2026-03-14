@@ -17,8 +17,10 @@ class VehicleRead(VehicleBaseSchema):
     vehicle_id: int
     vehicle_no: str
     notes: Optional[str] = None
+    is_active: bool
     created_at: datetime
-    updated_at: Optional[datetime] = None
+
 
 class VehicleUpdate(BaseModel):
-    vehicle_no: str
+    vehicle_no: Optional[str] = None
+    notes: Optional[str] = None

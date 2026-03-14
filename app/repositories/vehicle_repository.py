@@ -7,7 +7,9 @@ class VehicleRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, creator_id: int = None, vehicle_no: str = None, notes: str = None):
+    async def create(
+        self, creator_id: int = None, vehicle_no: str = None, notes: str = None
+    ):
         params = {}
         if creator_id is not None:
             params["creator_id"] = creator_id
@@ -37,3 +39,11 @@ class VehicleRepository:
             await self.db.flush()
             return True
         return False
+
+    async def update(self, vehicle_id: int, **kwargs):
+        vehicle = await self.get_by_id(vehicle_id)
+        if vehicle:
+            for key, value in kwargs.items():
+                setattr(vehicle, key, value)
+            await self.db.flush()
+        return vehicle

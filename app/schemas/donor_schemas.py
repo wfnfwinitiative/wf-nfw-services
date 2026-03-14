@@ -16,6 +16,8 @@ class DonorCreate(BaseModel):
     mobile_number: Optional[str] = None
     address: Optional[str] = None
     location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class DonorRead(DonorBaseSchema):
@@ -27,15 +29,20 @@ class DonorRead(DonorBaseSchema):
     mobile_number: Optional[str]
     address: Optional[str]
     location: Optional[str]
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     is_active: bool
     created_at: datetime
     updated_at: datetime
 
+
 class DonorUpdate(BaseModel):
-    donor_name: str
+    donor_name: Optional[str] = None
     city: Optional[str] = None
     pincode: Optional[str] = None
     contact_person: Optional[str] = None
     mobile_number: Optional[str] = None
     address: Optional[str] = None
     location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None

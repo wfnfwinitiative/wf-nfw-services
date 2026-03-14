@@ -21,7 +21,9 @@ class HungerSpot(Base):
     __table_args__ = {"schema": SCHEMA}
 
     hunger_spot_id = Column(BigInteger, Identity(), primary_key=True)
-    creator_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"), nullable=False)
+    creator_id = Column(
+        BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"), nullable=False
+    )
 
     spot_name = Column(String(100), nullable=False)
     city = Column(String(100))

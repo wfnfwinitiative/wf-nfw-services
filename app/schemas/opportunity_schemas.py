@@ -40,6 +40,7 @@ class OpportunityRead(OpportunityBaseSchema):
     created_at: datetime
     updated_at: datetime
 
+
 class OpportunityUpdate(BaseModel):
     donor_id: int
     status_id: int
@@ -55,6 +56,7 @@ class OpportunityUpdate(BaseModel):
     delivery_folder_id: Optional[str]
     start_time: Optional[datetime]
     end_time: Optional[datetime]
+
 
 class OpportunityDetailedRead(OpportunityBaseSchema):
     opportunity_id: int

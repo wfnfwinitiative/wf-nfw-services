@@ -16,6 +16,8 @@ class HungerSpotCreate(BaseModel):
     mobile_number: Optional[str] = None
     address: Optional[str] = None
     location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     capacity_meals: Optional[int] = None
 
 
@@ -28,17 +30,21 @@ class HungerSpotRead(HungerSpotBaseSchema):
     mobile_number: Optional[str]
     address: Optional[str]
     location: Optional[str]
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     capacity_meals: Optional[int]
     is_active: bool
     created_at: datetime
-    updated_at: Optional[datetime] = None
+
 
 class HungerSpotUpdate(BaseModel):
-    spot_name: str
+    spot_name: Optional[str] = None
     city: Optional[str] = None
     pincode: Optional[str] = None
     contact_person: Optional[str] = None
     mobile_number: Optional[str] = None
     address: Optional[str] = None
     location: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     capacity_meals: Optional[int] = None

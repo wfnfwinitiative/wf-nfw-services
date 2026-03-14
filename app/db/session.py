@@ -6,8 +6,10 @@ from app.core.config import settings
 
 DATABASE_URL = settings.DATABASE_URL
 
+
 class Base(DeclarativeBase):
     pass
+
 
 ssl_context = ssl.create_default_context()
 ssl_context.check_hostname = False

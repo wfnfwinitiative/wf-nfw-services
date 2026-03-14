@@ -16,7 +16,5 @@ class Role(Base):
 
     # 👇 reverse relationship
     users = relationship(
-        "User",
-        secondary=f"{SCHEMA}.user_roles",
-        back_populates="roles"
+        "User", secondary=f"{SCHEMA}.user_roles", back_populates="roles"
     )

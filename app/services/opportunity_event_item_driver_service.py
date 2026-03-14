@@ -12,15 +12,12 @@ class OpportunityEventItemDriverService:
 
     async def process_opportunity(self, event_data, items_data):
 
-        
         if not event_data or not isinstance(event_data, dict):
             raise ValueError("Valid opportunity event data is required")
 
-       
         if not items_data or not isinstance(items_data, list):
             raise ValueError("At least one opportunity item is required")
 
-        
         deduped_items = {}
 
         for item in items_data:
@@ -32,7 +29,6 @@ class OpportunityEventItemDriverService:
 
         items_data = list(deduped_items.values())
 
-       
         async with self.db.begin():
 
             opportunity = await self.event_repo.create(**event_data)
@@ -42,7 +38,4 @@ class OpportunityEventItemDriverService:
                 item["opportunity_id"] = opportunity.opportunity_id
                 created_items.append(await self.item_repo.create(**item))
 
-        return {
-            "event": opportunity,
-            "items": created_items
-        }
+        return {"event": opportunity, "items": created_items}

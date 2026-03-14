@@ -19,7 +19,9 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-def get_current_user_payload(credentials: HTTPAuthorizationCredentials = Depends(security)):
+def get_current_user_payload(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
     """Returns full JWT payload including user_id and role."""
     token = credentials.credentials
     try:
@@ -41,12 +43,20 @@ def require_roles(allowed_roles: List[str]):
         caller: dict = Depends(require_roles(["ADMIN", "COORDINATOR"]))
         caller: dict = Depends(require_roles(["ADMIN", "COORDINATOR", "DRIVER"]))
     """
+
     def role_checker(caller: dict = Depends(get_current_user_payload)):
-        if caller.get("role") not in allowed_roles:
+        # user roles is a list.
+        user_roles = caller.get("role") or []
+        user_roles = user_roles if isinstance(user_roles, list) else [user_roles]
+        print(user_roles)
+        print(allowed_roles)
+        print(any(r in allowed_roles for r in user_roles))
+        if not any(r in allowed_roles for r in user_roles):
+            print("Did it reach here ??")
             raise HTTPException(
                 status_code=403,
-                detail=f"Access denied. Required role: {', '.join(allowed_roles)}"
+                detail=f"Access denied. Required role: {', '.join(allowed_roles)}",
             )
         return caller
-    return role_checker
 
+    return role_checker

@@ -33,7 +33,9 @@ class AuthService:
             raise HTTPException(status_code=403, detail="User has no assigned role")
 
         # 4️⃣ Create token with role
-        token = create_access_token(user_id=user.user_id, name=user.name, role=user_roles)
+        token = create_access_token(
+            user_id=user.user_id, name=user.name, role=user_roles
+        )
 
         return token
 
@@ -41,7 +43,9 @@ class AuthService:
     def _authenticate_breakglass(password: str) -> str:
         """Authenticate the breakglass admin using env-stored password hash."""
         if not settings.BREAKGLASS_PASSWORD_HASH:
-            raise HTTPException(status_code=500, detail="Breakglass not configured on server")
+            raise HTTPException(
+                status_code=500, detail="Breakglass not configured on server"
+            )
 
         if not verify_password(password, settings.BREAKGLASS_PASSWORD_HASH):
             raise HTTPException(status_code=401, detail="Invalid credentials")

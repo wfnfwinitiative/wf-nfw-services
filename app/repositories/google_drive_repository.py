@@ -2,6 +2,7 @@
 """
 Repository to handle Google Drive OAuth and image upload.
 """
+
 import json
 import re
 import logging
@@ -33,7 +34,7 @@ class GoogleDriveRepository:
     def _drive_session(self, access_token: str) -> requests.Session:
         """Create a session pre-configured with the Drive authorization header."""
         session = requests.Session()
-        session.headers.update({'Authorization': f'Bearer {access_token}'})
+        session.headers.update({"Authorization": f"Bearer {access_token}"})
         return session
 
     def exchange_code_for_tokens(self, code: str) -> Tuple[str, str]:
@@ -43,11 +44,11 @@ class GoogleDriveRepository:
         logger.info(f"Code (first 20 chars): {code[:20]}...")
         try:
             data = {
-                'code': code,
-                'client_id': self.client_id,
-                'client_secret': self.client_secret,
-                'redirect_uri': self.redirect_uri,
-                'grant_type': 'authorization_code',
+                "code": code,
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "redirect_uri": self.redirect_uri,
+                "grant_type": "authorization_code",
             }
             logger.info(f"Sending token request to: {GOOGLE_DRIVE_TOKEN_URL}")
             response = self.token_session.post(GOOGLE_DRIVE_TOKEN_URL, data=data)
@@ -55,70 +56,78 @@ class GoogleDriveRepository:
             logger.info(f"Google response body: {response.text}")
             response.raise_for_status()
             tokens = response.json()
-            return tokens['access_token'], tokens['refresh_token']
+            return tokens["access_token"], tokens["refresh_token"]
         except Exception as e:
-            logger.error(f"Failed to exchange authorization code for tokens: {e}", exc_info=True)
+            logger.error(
+                f"Failed to exchange authorization code for tokens: {e}", exc_info=True
+            )
             raise
 
     def refresh_access_token(self, refresh_token: str) -> str:
         """Use the stored refresh token to get a fresh access token from Google."""
         try:
             data = {
-                'client_id': self.client_id,
-                'client_secret': self.client_secret,
-                'refresh_token': refresh_token,
-                'grant_type': 'refresh_token',
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "refresh_token": refresh_token,
+                "grant_type": "refresh_token",
             }
             response = self.token_session.post(GOOGLE_DRIVE_TOKEN_URL, data=data)
             response.raise_for_status()
-            return response.json()['access_token']
+            return response.json()["access_token"]
         except Exception as e:
             logger.error(f"Failed to refresh access token: {e}", exc_info=True)
             raise
 
-    def get_or_create_folder(self, name: str, parent_id: str, session: requests.Session) -> str:
+    def get_or_create_folder(
+        self, name: str, parent_id: str, session: requests.Session
+    ) -> str:
         """Find a folder by name under parent_id, or create it if it doesn't exist."""
         try:
             query = (
                 f"name='{name}' and mimeType='application/vnd.google-apps.folder' "
                 f"and '{parent_id}' in parents and trashed=false"
             )
-            resp = session.get(GOOGLE_DRIVE_FILES_URL, params={'q': query, 'fields': 'files(id,name)'})
+            resp = session.get(
+                GOOGLE_DRIVE_FILES_URL, params={"q": query, "fields": "files(id,name)"}
+            )
             resp.raise_for_status()
-            files = resp.json().get('files', [])
+            files = resp.json().get("files", [])
             if files:
                 logger.info(f"Found existing folder: {name} (id={files[0]['id']})")
-                return files[0]['id']
+                return files[0]["id"]
 
             metadata = {
-                'name': name,
-                'mimeType': 'application/vnd.google-apps.folder',
-                'parents': [parent_id],
+                "name": name,
+                "mimeType": "application/vnd.google-apps.folder",
+                "parents": [parent_id],
             }
             resp = session.post(
                 GOOGLE_DRIVE_FILES_URL,
-                headers={'Content-Type': 'application/json'},
+                headers={"Content-Type": "application/json"},
                 data=json.dumps(metadata),
             )
             resp.raise_for_status()
-            folder_id = resp.json()['id']
+            folder_id = resp.json()["id"]
             logger.info(f"Created folder: {name} (id={folder_id})")
             return folder_id
         except Exception as e:
             logger.error(f"Failed to get or create folder '{name}': {e}", exc_info=True)
             raise
 
-    def upload_image(self, session: requests.Session, file_path: str, file_name: str, folder_id: str) -> dict:
+    def upload_image(
+        self, session: requests.Session, file_path: str, file_name: str, folder_id: str
+    ) -> dict:
         """Upload a single image file into the specified Google Drive folder."""
         try:
             metadata = {
-                'name': file_name,
-                'parents': [folder_id],
+                "name": file_name,
+                "parents": [folder_id],
             }
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 files = {
-                    'metadata': ('metadata', json.dumps(metadata), 'application/json'),
-                    'file': (file_name, f, 'image/jpeg'),
+                    "metadata": ("metadata", json.dumps(metadata), "application/json"),
+                    "file": (file_name, f, "image/jpeg"),
                 }
                 response = session.post(GOOGLE_DRIVE_UPLOAD_URL, files=files)
             response.raise_for_status()
@@ -131,9 +140,9 @@ class GoogleDriveRepository:
         self,
         file_path: str,
         file_name: str,
-        upload_type: str = 'pickup',
-        driver_name: str = 'Driver',
-        opportunity_id: str = '',
+        upload_type: str = "pickup",
+        driver_name: str = "Driver",
+        opportunity_id: str = "",
         existing_folder_id: str | None = None,
     ) -> dict:
         """Orchestrate the full upload flow.
@@ -147,7 +156,9 @@ class GoogleDriveRepository:
         reuse it on subsequent uploads.
         """
         if not self.refresh_token:
-            raise Exception("GOOGLE_REFRESH_TOKEN is not set. Admin must complete OAuth flow first.")
+            raise Exception(
+                "GOOGLE_REFRESH_TOKEN is not set. Admin must complete OAuth flow first."
+            )
 
         try:
             logger.info("Refreshing access token...")
@@ -157,7 +168,7 @@ class GoogleDriveRepository:
             # Single Drive session for all API calls in this upload
             session = self._drive_session(access_token)
 
-            today = datetime.now().strftime('%Y-%m-%d')
+            today = datetime.now().strftime("%Y-%m-%d")
 
             # If caller already has a Drive folder ID saved, use it directly.
             if existing_folder_id:
@@ -167,19 +178,27 @@ class GoogleDriveRepository:
                 clean_driver = re.sub(r"\s+", "_", driver_name.strip())
                 parent_name = f"{opportunity_id}_{clean_driver}_{today}"
                 logger.info(f"Creating/finding parent folder: {parent_name}")
-                parent_id = self.get_or_create_folder(parent_name, self.root_folder_id, session)
+                parent_id = self.get_or_create_folder(
+                    parent_name, self.root_folder_id, session
+                )
 
-                child_name =  upload_type.title()
+                child_name = upload_type.title()
 
                 logger.info(f"Creating/finding subfolder: {child_name}")
-                target_folder_id = self.get_or_create_folder(child_name, parent_id, session)
+                target_folder_id = self.get_or_create_folder(
+                    child_name, parent_id, session
+                )
 
             logger.info(f"Uploading '{file_name}' to folder id={target_folder_id}")
-            file_response = self.upload_image(session, file_path, file_name, target_folder_id)
+            file_response = self.upload_image(
+                session, file_path, file_name, target_folder_id
+            )
             return {
                 "file": file_response,
                 "folder_id": target_folder_id,
             }
         except Exception as e:
-            logger.error(f"validate_and_upload failed for '{file_name}': {e}", exc_info=True)
+            logger.error(
+                f"validate_and_upload failed for '{file_name}': {e}", exc_info=True
+            )
             raise

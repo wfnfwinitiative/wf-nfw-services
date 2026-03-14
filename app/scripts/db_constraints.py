@@ -18,6 +18,7 @@ SCHEMA = settings.DB_SCHEMA
 # MIGRATION SCRIPT
 # ==============================
 
+
 async def apply_changes():
     async with AsyncSession(engine) as conn:
 
@@ -132,12 +133,7 @@ async def apply_changes():
         $$ LANGUAGE plpgsql;
         """))
 
-        tables_with_updated = [
-            "users",
-            "vehicles",
-            "donors",
-            "opportunities"
-        ]
+        tables_with_updated = ["users", "vehicles", "donors", "opportunities"]
 
         for table in tables_with_updated:
             await conn.execute(text(f"""

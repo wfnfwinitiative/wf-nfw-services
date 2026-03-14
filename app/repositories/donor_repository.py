@@ -17,7 +17,9 @@ class DonorRepository:
         mobile_number: str = None,
         address: str = None,
         location: str = None,
-        is_active: bool = True
+        latitude: float = None,
+        longitude: float = None,
+        is_active: bool = True,
     ) -> Donor:
         donor = Donor(
             creator_id=creator_id,
@@ -28,6 +30,8 @@ class DonorRepository:
             mobile_number=mobile_number,
             address=address,
             location=location,
+            latitude=latitude,
+            longitude=longitude,
             is_active=is_active,
         )
         self.db.add(donor)
@@ -35,9 +39,7 @@ class DonorRepository:
         return donor
 
     async def get_by_id(self, donor_id: int) -> Donor:
-        result = await self.db.execute(
-            select(Donor).where(Donor.donor_id == donor_id)
-        )
+        result = await self.db.execute(select(Donor).where(Donor.donor_id == donor_id))
         return result.scalar_one_or_none()
 
     async def get_all(self) -> list[Donor]:

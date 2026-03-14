@@ -11,10 +11,14 @@ router = APIRouter(prefix="/opportunity-events", tags=["Opportunity Events"])
 
 
 @router.post("/", response_model=OpportunityEventRead)
-async def create_event(payload: OpportunityEventCreate, db: AsyncSession = Depends(get_db)):
+async def create_event(
+    payload: OpportunityEventCreate, db: AsyncSession = Depends(get_db)
+):
     return await OpportunityEventService(db).create_event(**payload.dict())
 
 
-@router.get("/by-opportunity/{opportunity_id}", response_model=list[OpportunityEventRead])
+@router.get(
+    "/by-opportunity/{opportunity_id}", response_model=list[OpportunityEventRead]
+)
 async def get_events(opportunity_id: int, db: AsyncSession = Depends(get_db)):
     return await OpportunityEventService(db).get_events_for_opportunity(opportunity_id)

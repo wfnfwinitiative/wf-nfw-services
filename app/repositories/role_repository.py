@@ -11,9 +11,6 @@ class RoleRepository:
         result = await self.db.execute(select(Role))
         return result.scalars().all()
 
-
     async def get_by_name(self, role_name: str):
-        result = await self.db.execute(
-            select(Role).where(Role.role_name == role_name)
-        )
+        result = await self.db.execute(select(Role).where(Role.role_name == role_name))
         return result.scalar_one_or_none()

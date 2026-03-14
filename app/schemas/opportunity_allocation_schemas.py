@@ -24,6 +24,7 @@ class OpportunityAllocationRead(OpportunityAllocationBase):
     allocated_unit: str
     notes: Optional[str]
 
+
 class OpportunityAllocationUpdate(BaseModel):
     opportunity_item_id: int
     hunger_spot_id: int

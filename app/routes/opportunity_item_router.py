@@ -12,7 +12,9 @@ router = APIRouter(prefix="/opportunity-items", tags=["Opportunity Items"])
 
 
 @router.post("/", response_model=OpportunityItemRead)
-async def create_item(payload: OpportunityItemCreate, db: AsyncSession = Depends(get_db)):
+async def create_item(
+    payload: OpportunityItemCreate, db: AsyncSession = Depends(get_db)
+):
     return await OpportunityItemService(db).create_item(**payload.dict())
 
 
@@ -21,13 +23,17 @@ async def get_item(item_id: int, db: AsyncSession = Depends(get_db)):
     return await OpportunityItemService(db).get_item(item_id)
 
 
-@router.get("/by-opportunity/{opportunity_id}", response_model=list[OpportunityItemRead])
+@router.get(
+    "/by-opportunity/{opportunity_id}", response_model=list[OpportunityItemRead]
+)
 async def get_items(opportunity_id: int, db: AsyncSession = Depends(get_db)):
     return await OpportunityItemService(db).get_items_for_opportunity(opportunity_id)
 
 
 @router.patch("/{item_id}", response_model=OpportunityItemRead)
-async def update_item(item_id: int, payload: OpportunityItemUpdate, db: AsyncSession = Depends(get_db)):
+async def update_item(
+    item_id: int, payload: OpportunityItemUpdate, db: AsyncSession = Depends(get_db)
+):
     return await OpportunityItemService(db).update_item(
         item_id,
         **payload.dict(exclude_unset=True),

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.services.user_role_service import UserRoleService
+from app.dependencies.auth import require_roles
 
 router = APIRouter(prefix="/user-roles", tags=["User Roles"])
 

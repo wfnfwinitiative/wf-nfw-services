@@ -12,7 +12,9 @@ router = APIRouter(prefix="/opportunity-allocations", tags=["Opportunity Allocat
 
 
 @router.post("/", response_model=OpportunityAllocationRead)
-async def create_allocation(payload: OpportunityAllocationCreate, db: AsyncSession = Depends(get_db)):
+async def create_allocation(
+    payload: OpportunityAllocationCreate, db: AsyncSession = Depends(get_db)
+):
     return await OpportunityAllocationService(db).create_allocation(**payload.dict())
 
 
@@ -21,13 +23,21 @@ async def get_allocation(allocation_id: int, db: AsyncSession = Depends(get_db))
     return await OpportunityAllocationService(db).get_allocation(allocation_id)
 
 
-@router.get("/by-item/{opportunity_item_id}", response_model=list[OpportunityAllocationRead])
+@router.get(
+    "/by-item/{opportunity_item_id}", response_model=list[OpportunityAllocationRead]
+)
 async def get_allocations(opportunity_item_id: int, db: AsyncSession = Depends(get_db)):
-    return await OpportunityAllocationService(db).get_allocations_for_item(opportunity_item_id)
+    return await OpportunityAllocationService(db).get_allocations_for_item(
+        opportunity_item_id
+    )
 
 
 @router.patch("/{allocation_id}", response_model=OpportunityAllocationRead)
-async def update_allocation(allocation_id: int, payload: OpportunityAllocationUpdate, db: AsyncSession = Depends(get_db)):
+async def update_allocation(
+    allocation_id: int,
+    payload: OpportunityAllocationUpdate,
+    db: AsyncSession = Depends(get_db),
+):
     return await OpportunityAllocationService(db).update_allocation(
         allocation_id,
         **payload.dict(exclude_unset=True),

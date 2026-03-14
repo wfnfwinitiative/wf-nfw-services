@@ -14,12 +14,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 drive_repo = GoogleDriveRepository()
 
-@router.post('/upload-image')
+
+@router.post("/upload-image")
 async def upload_image(
     file: UploadFile = File(...),
-    upload_type: str = Form('pickup'),
-    driver_name: str = Form('Driver'),
-    opportunity_id: str = Form(''),
+    upload_type: str = Form("pickup"),
+    driver_name: str = Form("Driver"),
+    opportunity_id: str = Form(""),
     db: AsyncSession = Depends(get_db),
 ):
     """Upload image to Google Drive using stored refresh token from env.
@@ -29,7 +30,9 @@ async def upload_image(
     """
 
     if upload_type not in {"pickup", "delivery"}:
-        raise HTTPException(status_code=400, detail="upload_type must be either 'pickup' or 'delivery'")
+        raise HTTPException(
+            status_code=400, detail="upload_type must be either 'pickup' or 'delivery'"
+        )
 
     folder_field = None
     existing_folder_id = None
@@ -37,11 +40,13 @@ async def upload_image(
 
     if opportunity_id:
         try:
-            opportunity_obj = await OpportunityService(db).get_opportunity(int(opportunity_id))
-            if upload_type == 'pickup':
-                folder_field = 'pickup_folder_id'
-            elif upload_type == 'delivery':
-                folder_field = 'delivery_folder_id'
+            opportunity_obj = await OpportunityService(db).get_opportunity(
+                int(opportunity_id)
+            )
+            if upload_type == "pickup":
+                folder_field = "pickup_folder_id"
+            elif upload_type == "delivery":
+                folder_field = "delivery_folder_id"
 
             if folder_field:
                 existing_folder_id = getattr(opportunity_obj, folder_field)
@@ -52,12 +57,14 @@ async def upload_image(
 
     temp_path = None
     try:
-        suffix = os.path.splitext(file.filename)[1] if file.filename else ''
+        suffix = os.path.splitext(file.filename)[1] if file.filename else ""
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(file.file.read())
             temp_path = tmp.name
 
-        logger.info(f"Uploading '{file.filename}' | type={upload_type} | driver={driver_name} | opp={opportunity_id}")
+        logger.info(
+            f"Uploading '{file.filename}' | type={upload_type} | driver={driver_name} | opp={opportunity_id}"
+        )
 
         result = drive_repo.validate_and_upload(
             temp_path,
@@ -70,14 +77,18 @@ async def upload_image(
 
         # Persist folder id for future uploads if we just created it
         if opportunity_obj and folder_field and not existing_folder_id:
-            folder_id = result.get('folder_id')
+            folder_id = result.get("folder_id")
             if folder_id:
                 await OpportunityService(db).update_opportunity(
                     opportunity_obj.opportunity_id,
                     **{folder_field: folder_id},
                 )
 
-        return {"success": True, "file": result.get("file"), "folder_id": result.get("folder_id")}
+        return {
+            "success": True,
+            "file": result.get("file"),
+            "folder_id": result.get("folder_id"),
+        }
     except Exception as e:
         logger.error(f"Upload failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -88,7 +99,8 @@ async def upload_image(
         except Exception:
             pass
 
-@router.get('/oauth2callback')
+
+@router.get("/oauth2callback")
 def oauth2callback(request: Request):
     """
     Handle Google OAuth redirect, exchange code for tokens.
@@ -98,7 +110,7 @@ def oauth2callback(request: Request):
     logger.info(f"Full callback URL: {request.url}")
     logger.info(f"All query params: {dict(request.query_params)}")
 
-    code = request.query_params.get('code')
+    code = request.query_params.get("code")
     if not code:
         logger.error("Missing authorization code in callback")
         return {"error": "Missing authorization code"}
@@ -113,12 +125,16 @@ def oauth2callback(request: Request):
         logger.info(f"Refresh token received: {'YES' if refresh_token else 'NO'}")
 
         # Save refresh token to file
-        token_path = 'app/core/google_refresh_token.txt'
-        with open(token_path, 'w') as token_file:
+        token_path = "app/core/google_refresh_token.txt"
+        with open(token_path, "w") as token_file:
             token_file.write(refresh_token)
         logger.info(f"Refresh token saved to {token_path}")
 
-        return {"access_token": access_token, "refresh_token": refresh_token, "message": "Refresh token saved to server."}
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "message": "Refresh token saved to server.",
+        }
     except Exception as e:
         logger.error(f"OAuth2 callback error: {str(e)}", exc_info=True)
         return {"error": str(e)}
