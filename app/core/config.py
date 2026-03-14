@@ -1,6 +1,11 @@
 import os
 from pydantic_settings import BaseSettings
 
+DATABASE_URL='postgresql+asyncpg://neondb_owner:npg_8qaoMAUN1OLb@ep-wandering-cake-aic8kt7m-pooler.c-4.us-east-1.aws.neon.tech/neondb'
+BREAKGLASS_MOBILE='0000000000'
+BREAKGLASS_PASSWORD='BreakGlassLogin7654321!'
+BREAKGLASS_PASSWORD_HASH='$argon2id$v=19$m=65536,t=3,p=4$qDWmVKpVao1RijGmNEZoLQ$iPDVGPdLDSwIpwBveVfVQoKW+4ijiXx4z6JiB1MfrEg'
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "No Food Waste"
@@ -15,7 +20,7 @@ class Settings(BaseSettings):
     # DB_HOST: str = os.getenv("DB_HOST")
     DB_SCHEMA: str = os.getenv("DB_SCHEMA", "wfnfw")
     DATABASE_URL: str = os.getenv(
-        "DATABASE_URL", "already configured in vecel environment variables"
+        "DATABASE_URL", DATABASE_URL
     )
     print(DATABASE_URL)
     GOOGLE_DRIVE_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_FOLDER_ID", "")
@@ -25,8 +30,8 @@ class Settings(BaseSettings):
     GOOGLE_REFRESH_TOKEN: str = os.getenv("GOOGLE_REFRESH_TOKEN", "")
 
     # Breakglass (emergency admin bootstrap)
-    BREAKGLASS_MOBILE: str = os.getenv("BREAKGLASS_MOBILE", "0000000000")
-    BREAKGLASS_PASSWORD_HASH: str = os.getenv("BREAKGLASS_PASSWORD_HASH", "")
+    BREAKGLASS_MOBILE: str = os.getenv("BREAKGLASS_MOBILE", BREAKGLASS_MOBILE)
+    BREAKGLASS_PASSWORD_HASH: str = os.getenv("BREAKGLASS_PASSWORD_HASH", BREAKGLASS_PASSWORD_HASH)
 
     # Google API endpoint URLs — fixed by Google, centralised here for consistency
     GOOGLE_DRIVE_FILES_URL: str = "https://www.googleapis.com/drive/v3/files"
