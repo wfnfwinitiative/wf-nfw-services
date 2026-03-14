@@ -7,7 +7,7 @@ from app.schemas.donor_schemas import (
     DonorUpdate,
 )
 from app.services.donor_service import DonorService
-# from app.dependencies.auth import get_current_user
+from app.dependencies.auth import require_roles
 
 router = APIRouter(prefix="/donors", tags=["Donors"])
 
@@ -16,10 +16,10 @@ router = APIRouter(prefix="/donors", tags=["Donors"])
 async def create_donor(
     payload: DonorCreate,
     db: AsyncSession = Depends(get_db),
-    # current_user=Depends(get_current_user),
+    caller: dict = Depends(require_roles(["ADMIN", "COORDINATOR"])),
 ):
     return await DonorService(db).create_donor(
-        creator_id=4,
+        creator_id=caller.get("user_id"),
         **payload.dict(),
     )
 
@@ -34,14 +34,29 @@ async def get_donor(donor_id: int, db: AsyncSession = Depends(get_db)):
     return await DonorService(db).get_donor(donor_id)
 
 
-@router.patch("/{donor_id}", response_model=DonorRead)
-async def update_donor(donor_id: int, payload: DonorUpdate, db: AsyncSession = Depends(get_db)):
+@router.patch("/{donor_id}", response_model=DonorRead, dependencies=[Depends(require_roles(["ADMIN", "COORDINATOR"]))])
+async def update_donor(
+        donor_id: int,
+        payload: DonorUpdate,
+        db: AsyncSession = Depends(get_db),
+):
     return await DonorService(db).update_donor(
         donor_id,
         **payload.dict(exclude_unset=True),
     )
 
 
-@router.delete("/{donor_id}")
-async def delete_donor(donor_id: int, db: AsyncSession = Depends(get_db)):
+@router.delete("/{donor_id}", dependencies=[Depends(require_roles(["ADMIN", "COORDINATOR"]))])
+async def delete_donor(
+        donor_id: int,
+        db: AsyncSession = Depends(get_db),
+):
     return await DonorService(db).delete_donor(donor_id)
+
+
+@router.post("/activate/{donor_id}", dependencies=[Depends(require_roles(["ADMIN", "COORDINATOR"]))])
+async def activate_donor(
+        donor_id: int,
+        db: AsyncSession = Depends(get_db),
+):
+    return await DonorService(db).activate_donor(donor_id)

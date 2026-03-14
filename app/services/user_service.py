@@ -19,6 +19,7 @@ class UserService:
         mobile_number: str,
         password: str,
         role_name: str,
+        email: str = None,
         caller: dict = None,
     ):
         """Create a user with a role.
@@ -34,16 +35,18 @@ class UserService:
         all_users = await self.repo.get_all()
         has_users = len(all_users) > 0
 
-        print(has_users)
+        user_roles = caller.get("role") or []
+        user_roles = user_roles if isinstance(user_roles, list) else [user_roles]
+
         if not has_users:
             # Fresh DB — only SUPPORTADMIN (breakglass) can create first ADMIN
-            if caller.get("role") != "SUPPORTADMIN":
+            if not any(r in ["SUPPORTADMIN"] for r in user_roles):
                 raise HTTPException(status_code=403, detail="Only SUPPORTADMIN can create the first user")
             if role_name != "ADMIN":
                 raise HTTPException(status_code=403, detail="First user must be an ADMIN")
         else:
             # Users exist — require authenticated ADMIN caller
-            if caller.get("role") not in ["ADMIN", "SUPPORTADMIN"]:
+            if not any(r in ["ADMIN", "SUPPORTADMIN"] for r in user_roles):
                 raise HTTPException(status_code=403, detail="Only ADMIN can create users")
 
         existing = await self.repo.get_by_mobile(mobile_number)
@@ -56,7 +59,7 @@ class UserService:
 
         password_hash = hash_password(password)
 
-        user = await self.repo.create(name, mobile_number, password_hash)
+        user = await self.repo.create(name, mobile_number, password_hash, email=email)
         await self.db.commit()
 
         await self.user_role_repo.assign_role(user.user_id, role.role_id)
@@ -66,6 +69,7 @@ class UserService:
             "user_id": user.user_id,
             "name": user.name,
             "mobile_number": user.mobile_number,
+            "email": user.email,
             "is_active": user.is_active,
             "created_at": user.created_at,
             "roles": [role.role_name],
@@ -80,7 +84,11 @@ class UserService:
         """Reset an ADMIN user's password. Only SUPPORTADMIN can do this."""
         if not caller:
             raise HTTPException(status_code=401, detail="Authentication required")
-        if caller.get("role") != "SUPPORTADMIN":
+        
+        user_roles = caller.get("role") or []
+        user_roles = user_roles if isinstance(user_roles, list) else [user_roles]
+
+        if "SUPPORTADMIN" not in user_roles:
             raise HTTPException(status_code=403, detail="Only SUPPORTADMIN can reset admin password")
 
         user = await self.repo.get_by_mobile(mobile_number)
@@ -127,8 +135,13 @@ class UserService:
         """ADMIN unlocks a user: resets password to a default and reactivates."""
         if not caller:
             raise HTTPException(status_code=401, detail="Authentication required")
-        if caller.get("role") not in ["ADMIN", "SUPPORTADMIN"]:
-            raise HTTPException(status_code=403, detail="Only ADMIN can unlock users")
+
+        user_roles = caller.get("role") or []
+        user_roles = user_roles if isinstance(user_roles, list) else [user_roles]
+
+
+        if "ADMIN" not in user_roles and "SUPPORTADMIN" not in user_roles:
+            raise HTTPException(status_code=403, detail="Only ADMIN or SUPPORTADMIN can unlock users")
 
         user = await self.repo.get_by_id(user_id)
         if not user:
@@ -155,6 +168,7 @@ class UserService:
             "user_id": user.user_id,
             "name": user.name,
             "mobile_number": user.mobile_number,
+            "email": user.email,
             "is_active": user.is_active,
             "created_at": user.created_at,
             "roles": [role.role_name for role in user.roles],
@@ -169,6 +183,7 @@ class UserService:
             "user_id": user.user_id,
             "name": user.name,
             "mobile_number": user.mobile_number,
+            "email": user.email,
             "is_active": user.is_active,
             "created_at": user.created_at,
             "roles": [role.role_name for role in user.roles],
@@ -181,6 +196,7 @@ class UserService:
                 "user_id": user.user_id,
                 "name": user.name,
                 "mobile_number": user.mobile_number,
+                "email": user.email,
                 "is_active": user.is_active,
                 "created_at": user.created_at,
                 "roles": [role.role_name for role in user.roles]
@@ -194,6 +210,7 @@ class UserService:
                 "user_id": user.user_id,
                 "name": user.name,
                 "mobile_number": user.mobile_number,
+                "email": user.email,
                 "is_active": user.is_active,
                 "created_at": user.created_at,
                 "roles": [role.role_name for role in user.roles]
@@ -207,6 +224,7 @@ class UserService:
                 "user_id": user.user_id,
                 "name": user.name,
                 "mobile_number": user.mobile_number,
+                "email": user.email,
                 "is_active": user.is_active,
                 "created_at": user.created_at,
                 "roles": [role.role_name for role in user.roles]
@@ -220,3 +238,35 @@ class UserService:
             raise HTTPException(status_code=404, detail="User not found")
         await self.db.commit()
         return {"message": "User deactivated"}
+
+    async def activate_user(self, user_id: int):
+        user = await self.repo.activate(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        await self.db.commit()
+        return {"message": "User activated"}
+
+
+    async def update_user(self, user_id: int, **data):
+        user = await self.repo.get_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        password = data.pop("password", None)
+        if password:
+            data["password_hash"] = hash_password(password)
+
+        print(password)
+        print(data)
+
+        user = await self.repo.update(user_id, **data)
+        await self.db.commit()
+        return {
+            "user_id": user.user_id,
+            "name": user.name,
+            "mobile_number": user.mobile_number,
+            "email": user.email,
+            "is_active": user.is_active,
+            "created_at": user.created_at,
+            "roles": [role.role_name for role in user.roles],
+        }

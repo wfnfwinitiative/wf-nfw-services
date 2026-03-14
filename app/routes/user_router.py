@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
-from app.schemas.user_schemas import UserCreate, UserRead
+from app.schemas.user_schemas import UserCreate, UserRead, UserUpdate
 from app.services.user_service import UserService
 from app.dependencies.auth import get_current_user_payload, require_roles
 
@@ -30,6 +30,7 @@ async def create_user_with_role(
         mobile_number=payload.mobile_number,
         password=payload.password,
         role_name=payload.role_name,
+        email=payload.email,
         caller=caller,
     )
 
@@ -86,10 +87,33 @@ async def get_users_by_role(role_name: str, db: AsyncSession = Depends(get_db)):
     return await UserService(db).get_users_by_role(role_name)
 
 @router.patch("/{user_id}")
-async def deactivate_user(user_id: int, db: AsyncSession = Depends(get_db)):
-    return await UserService(db).deactivate_user(user_id)
+async def update_user(
+        user_id: int,
+        payload: UserUpdate,
+        db: AsyncSession = Depends(get_db),
+        caller: dict = Depends(require_roles(["ADMIN"])),
+):
+    return await UserService(db).update_user(
+        user_id,
+        **payload.dict(exclude_unset=True),
+    )
 
 
 @router.delete("/{user_id}")
-async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_user(
+        user_id: int,
+        db: AsyncSession = Depends(get_db),
+        caller: dict = Depends(require_roles(["ADMIN"])),
+):
+    if caller.get("user_id") == user_id:
+        raise HTTPException(status_code=404, detail="Logged-in User Cannot be deactivated")
     return await UserService(db).deactivate_user(user_id)
+
+
+@router.post("/activate/{user_id}")
+async def activate_user(
+        user_id: int,
+        db: AsyncSession = Depends(get_db),
+        caller: dict = Depends(require_roles(["ADMIN", "SUPPORTADMIN"])),
+):
+    return await UserService(db).activate_user(user_id)
