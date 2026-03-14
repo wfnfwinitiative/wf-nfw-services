@@ -1,7 +1,6 @@
 import os
 from pydantic_settings import BaseSettings
 
-DATABASE_URL='postgresql+asyncpg://neondb_owner:npg_8qaoMAUN1OLb@ep-wandering-cake-aic8kt7m-pooler.c-4.us-east-1.aws.neon.tech/neondb'
 BREAKGLASS_MOBILE='0000000000'
 BREAKGLASS_PASSWORD='BreakGlassLogin7654321!'
 BREAKGLASS_PASSWORD_HASH='$argon2id$v=19$m=65536,t=3,p=4$qDWmVKpVao1RijGmNEZoLQ$iPDVGPdLDSwIpwBveVfVQoKW+4ijiXx4z6JiB1MfrEg'
