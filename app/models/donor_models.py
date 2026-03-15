@@ -29,6 +29,8 @@ class Donor(Base):
     mobile_number = Column(String(15))
     address = Column(String(255))
     location = Column(String(255))
+    latitude = Column(Numeric(10, 7))
+    longitude = Column(Numeric(10, 7))
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
     updated_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
