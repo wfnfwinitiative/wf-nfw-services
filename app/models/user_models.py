@@ -15,6 +15,7 @@ class User(Base):
     user_id = Column(BigInteger, Identity(), primary_key=True)
     name = Column(String(100), nullable=False)
     mobile_number = Column(String(15), unique=True, nullable=False)
+    email = Column(String(255), nullable=True)
     password_hash = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=False)
