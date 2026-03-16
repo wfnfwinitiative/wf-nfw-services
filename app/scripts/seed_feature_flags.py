@@ -22,7 +22,7 @@ async def seed_feature_flags():
             existing = result.scalar_one_or_none()
 
             if not existing:
-                db.add(FeatureFlag(feature_flag_name=flag_name, enabled=False))
+                db.add(FeatureFlag(feature_flag_name=flag_name, enabled=True))
                 print(f"Inserted feature flag: {flag_name}")
             else:
                 print(f"Feature flag already exists: {flag_name}")
