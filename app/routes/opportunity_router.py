@@ -6,6 +6,7 @@ from app.schemas.opportunity_schemas import (
     OpportunityDetailedRead,
     OpportunityRead,
     OpportunityUpdate,
+    OpportunityDetailRead,
 )
 from app.services.opportunity_service import OpportunityService
 from app.dependencies.auth import require_roles
@@ -30,7 +31,7 @@ async def get_opportunities(db: AsyncSession = Depends(get_db)):
     return await OpportunityService(db).get_all_opportunities()
 
 
-@router.get("/{opportunity_id}", response_model=OpportunityRead)
+@router.get("/{opportunity_id}", response_model=OpportunityDetailRead)
 async def get_opportunity(opportunity_id: int, db: AsyncSession = Depends(get_db)):
     return await OpportunityService(db).get_opportunity(opportunity_id)
 
@@ -45,9 +46,9 @@ async def update_opportunity(
         opportunity_id: int,
         payload: OpportunityUpdate,
         db: AsyncSession = Depends(get_db),
+        caller: dict = Depends(require_roles(["ADMIN", "COORDINATOR"])),
 ):
-    return await OpportunityService(db).update_opportunity(
-        opportunity_id,
-        **payload.dict(exclude_unset=True),
-    )
+    data = payload.dict(exclude_unset=True)
+    data['creator_id'] = caller.get("user_id")
+    return await OpportunityService(db).update_opportunity(opportunity_id, **data)
 
