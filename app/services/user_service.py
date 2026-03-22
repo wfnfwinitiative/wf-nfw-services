@@ -171,7 +171,7 @@ class UserService:
             "email": user.email,
             "is_active": user.is_active,
             "created_at": user.created_at,
-            "roles": [role.role_name for role in user.roles],
+            "roles": sorted(map(lambda role: role.role_name, user.roles)),
         }
 
     async def get_user_by_mobile(self, phone_number: str):
@@ -186,7 +186,7 @@ class UserService:
             "email": user.email,
             "is_active": user.is_active,
             "created_at": user.created_at,
-            "roles": [role.role_name for role in user.roles],
+            "roles": sorted(map(lambda role: role.role_name, user.roles)),
         }
 
     async def get_all_users(self):
@@ -199,10 +199,11 @@ class UserService:
                 "email": user.email,
                 "is_active": user.is_active,
                 "created_at": user.created_at,
-                "roles": [role.role_name for role in user.roles]
+                "roles": sorted(map(lambda role: role.role_name, user.roles))
             }
             for user in users
         ]
+
     async def get_users_by_role(self, role_name: str):
         users = await self.repo.get_by_role_name(role_name)
         return [
@@ -213,21 +214,7 @@ class UserService:
                 "email": user.email,
                 "is_active": user.is_active,
                 "created_at": user.created_at,
-                "roles": [role.role_name for role in user.roles]
-            }
-            for user in users
-        ]
-    async def get_users_by_role(self, role_name: str):
-        users = await self.repo.get_by_role_name(role_name)
-        return [
-            {
-                "user_id": user.user_id,
-                "name": user.name,
-                "mobile_number": user.mobile_number,
-                "email": user.email,
-                "is_active": user.is_active,
-                "created_at": user.created_at,
-                "roles": [role.role_name for role in user.roles]
+                "roles": sorted(map(lambda role: role.role_name, user.roles))
             }
             for user in users
         ]
@@ -256,9 +243,6 @@ class UserService:
         if password:
             data["password_hash"] = hash_password(password)
 
-        print(password)
-        print(data)
-
         user = await self.repo.update(user_id, **data)
         await self.db.commit()
         return {
@@ -268,5 +252,5 @@ class UserService:
             "email": user.email,
             "is_active": user.is_active,
             "created_at": user.created_at,
-            "roles": [role.role_name for role in user.roles],
+            "roles": sorted(map(lambda role: role.role_name, user.roles)),
         }

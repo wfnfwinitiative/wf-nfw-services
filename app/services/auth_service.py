@@ -33,7 +33,7 @@ class AuthService:
             raise HTTPException(status_code=403, detail="User has no assigned role")
 
         # 4️⃣ Create token with role
-        token = create_access_token(user_id=user.user_id, name=user.name, role=user_roles)
+        token = create_access_token(user_id=user.user_id, name=user.name, role=sorted(user_roles))
 
         return token
 
@@ -47,5 +47,5 @@ class AuthService:
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         # Return token with special SUPPORTADMIN role and user_id=0
-        token = create_access_token(user_id=0, name="SUPPORTADMIN", role="SUPPORTADMIN")
+        token = create_access_token(user_id=0, name="SUPPORTADMIN", role=["SUPPORTADMIN"])
         return token
