@@ -38,19 +38,22 @@ class ReportRepository:
 
         conditions = []
 
-        
+        #  Date filters
         if filters.start_date:
             conditions.append(Opportunity.created_at >= filters.start_date)
 
         if filters.end_date:
             conditions.append(Opportunity.created_at <= filters.end_date)
 
-        
+        #  Multi filters
         if filters.driver_ids:
             conditions.append(Opportunity.driver_id.in_(filters.driver_ids))
 
         if filters.hunger_spot_ids:
             conditions.append(Opportunity.hunger_spot_id.in_(filters.hunger_spot_ids))
+
+        if filters.vehicle_ids:   # 🔥 ADDED HERE
+            conditions.append(Opportunity.vehicle_id.in_(filters.vehicle_ids))
 
         if filters.donor_id:
             conditions.append(Opportunity.donor_id == filters.donor_id)
@@ -88,19 +91,22 @@ class ReportRepository:
 
         conditions = []
 
-      
+        #  Date filters
         if filters.start_date:
             conditions.append(Opportunity.created_at >= filters.start_date)
 
         if filters.end_date:
             conditions.append(Opportunity.created_at <= filters.end_date)
 
-      
+    
         if filters.driver_ids:
             conditions.append(Opportunity.driver_id.in_(filters.driver_ids))
 
         if filters.hunger_spot_ids:
             conditions.append(Opportunity.hunger_spot_id.in_(filters.hunger_spot_ids))
+
+        if filters.vehicle_ids:   # 🔥 ADDED HERE
+            conditions.append(Opportunity.vehicle_id.in_(filters.vehicle_ids))
 
         if filters.status_id:
             conditions.append(Opportunity.status_id == filters.status_id)
@@ -129,19 +135,22 @@ class ReportRepository:
 
         conditions = []
 
-       
+        # Date filters
         if filters.start_date:
             conditions.append(Opportunity.created_at >= filters.start_date)
 
         if filters.end_date:
             conditions.append(Opportunity.created_at <= filters.end_date)
 
-       
+        #  Multi filters
         if filters.driver_ids:
             conditions.append(Opportunity.driver_id.in_(filters.driver_ids))
 
         if filters.hunger_spot_ids:
             conditions.append(Opportunity.hunger_spot_id.in_(filters.hunger_spot_ids))
+
+        if filters.vehicle_ids:  
+            conditions.append(Opportunity.vehicle_id.in_(filters.vehicle_ids))
 
         if filters.status_id:
             conditions.append(Opportunity.status_id == filters.status_id)

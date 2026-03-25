@@ -9,6 +9,7 @@ class ReportFilterRequest(BaseModel):
 
     driver_ids: Optional[List[int]] = None  
     hunger_spot_ids: Optional[List[int]] = None 
+    vehicle_ids: Optional[List[int]] = None
 
     donor_id: Optional[int] = None
     status_id: Optional[int] = None
