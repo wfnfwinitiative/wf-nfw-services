@@ -13,3 +13,4 @@ class ReportFilterRequest(BaseModel):
 
     donor_id: Optional[int] = None
     status_id: Optional[int] = None
+    donor_ids: Optional[List[int]] = None 
