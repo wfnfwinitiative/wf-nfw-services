@@ -38,6 +38,15 @@ class HungerSpotService:
         if not spot:
             raise HTTPException(status_code=404, detail="Hunger spot not found")
 
-        await self.repository.delete(hunger_spot_id)
+        await self.repository.update(hunger_spot_id, is_active=False)
         await self.db.commit()
-        return {"message": "Hunger spot deleted successfully"}
+        return {"message": "Hunger spot deactivated successfully"}
+
+    async def activate_hunger_spot(self, hunger_spot_id: int) -> dict:
+        spot = await self.repository.get_by_id(hunger_spot_id)
+        if not spot:
+            raise HTTPException(status_code=404, detail="Hunger spot not found")
+
+        await self.repository.update(hunger_spot_id, is_active=True)
+        await self.db.commit()
+        return {"message": "Hunger spot activated successfully"}

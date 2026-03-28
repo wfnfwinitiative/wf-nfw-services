@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, String, Text, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, BigInteger, String, Boolean, Text, TIMESTAMP, ForeignKey
 from sqlalchemy.schema import Identity
 from sqlalchemy.sql import func
 from app.db.session import Base
@@ -15,4 +15,5 @@ class Vehicle(Base):
     vehicle_no = Column(String(20), unique=True, nullable=False)
     notes = Column(Text)
     creator_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(TIMESTAMP, server_default=func.now(), nullable=True)
