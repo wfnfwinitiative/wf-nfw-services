@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
+from app.schemas.opportunity_item_schemas import OpportunityItemRead
 
 
 class OpportunityBaseSchema(BaseModel):
@@ -24,6 +25,7 @@ class OpportunityCreate(BaseModel):
 class OpportunityRead(OpportunityBaseSchema):
     opportunity_id: int
     donor_id: int
+    hunger_spot_id: Optional[int]
     status_id: int
     driver_id: Optional[int]
     vehicle_id: Optional[int]
@@ -39,6 +41,8 @@ class OpportunityRead(OpportunityBaseSchema):
     delivery_folder_id: Optional[str]
     created_at: datetime
     updated_at: datetime
+    previous_status_id: Optional[int]
+    new_status_id: Optional[int]
 
 class OpportunityUpdate(BaseModel):
     donor_id: int
@@ -85,6 +89,28 @@ class OpportunityDetailedRead(OpportunityBaseSchema):
     created_at: datetime
     updated_at: datetime
     previous_status_id: Optional[int]
-    previous_status_name: Optional[str]
     new_status_id: Optional[int]
-    new_status_name: Optional[str]
+
+
+class OpportunityDetailRead(OpportunityBaseSchema):
+    opportunity_id: int
+    donor_id: int
+    hunger_spot_id: int
+    status_id: int
+    driver_id: Optional[int]
+    vehicle_id: Optional[int]
+    creator_id: int
+    feeding_count: Optional[int]
+    pickup_eta: Optional[datetime]
+    delivery_by: Optional[datetime]
+    start_time: Optional[datetime]
+    end_time: Optional[datetime]
+    notes: Optional[str]
+    image_link: Optional[str]
+    pickup_folder_id: Optional[str]
+    delivery_folder_id: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    opportunity_items: list[OpportunityItemRead]
+    previous_status_id: Optional[int]
+    new_status_id: Optional[int]

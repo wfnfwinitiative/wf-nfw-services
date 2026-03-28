@@ -17,6 +17,8 @@ class DonorRepository:
         mobile_number: str = None,
         address: str = None,
         location: str = None,
+        latitude: float = None,
+        longitude: float = None,
         is_active: bool = True
     ) -> Donor:
         donor = Donor(
@@ -28,6 +30,8 @@ class DonorRepository:
             mobile_number=mobile_number,
             address=address,
             location=location,
+            latitude=latitude,
+            longitude=longitude,
             is_active=is_active,
         )
         self.db.add(donor)

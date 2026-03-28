@@ -6,9 +6,10 @@ from app.schemas.opportunity_schemas import (
     OpportunityDetailedRead,
     OpportunityRead,
     OpportunityUpdate,
+    OpportunityDetailRead,
 )
 from app.services.opportunity_service import OpportunityService
-from app.dependencies.auth import get_current_user
+from app.dependencies.auth import require_roles
 
 router = APIRouter(prefix="/opportunities", tags=["Opportunities"])
 
@@ -17,10 +18,10 @@ router = APIRouter(prefix="/opportunities", tags=["Opportunities"])
 async def create_opportunity(
     payload: OpportunityCreate,
     db: AsyncSession = Depends(get_db),
-    # current_user=Depends(get_current_user),
+    caller: dict = Depends(require_roles(["ADMIN", "COORDINATOR"])),
 ):
     return await OpportunityService(db).create_opportunity(
-        creator_id=4,
+        creator_id=caller.get("user_id"),
         **payload.dict(),
     )
 
@@ -30,7 +31,7 @@ async def get_opportunities(db: AsyncSession = Depends(get_db)):
     return await OpportunityService(db).get_all_opportunities()
 
 
-@router.get("/{opportunity_id}", response_model=OpportunityRead)
+@router.get("/{opportunity_id}", response_model=OpportunityDetailRead)
 async def get_opportunity(opportunity_id: int, db: AsyncSession = Depends(get_db)):
     return await OpportunityService(db).get_opportunity(opportunity_id)
 
@@ -40,14 +41,14 @@ async def get_opportunities_by_driver_id(driver_id: int, db: AsyncSession = Depe
     return await OpportunityService(db).get_opportunities_by_driver_id(driver_id)
 
 
-@router.patch("/{opportunity_id}", response_model=OpportunityRead)
-async def update_opportunity(opportunity_id: int, payload: OpportunityUpdate, db: AsyncSession = Depends(get_db)):
-    return await OpportunityService(db).update_opportunity(
-        opportunity_id,
-        **payload.dict(exclude_unset=True),
-    )
+@router.patch("/{opportunity_id}", response_model=OpportunityRead, dependencies=[Depends(require_roles(["ADMIN", "COORDINATOR"]))])
+async def update_opportunity(
+        opportunity_id: int,
+        payload: OpportunityUpdate,
+        db: AsyncSession = Depends(get_db),
+        caller: dict = Depends(require_roles(["ADMIN", "COORDINATOR"])),
+):
+    data = payload.dict(exclude_unset=True)
+    data['creator_id'] = caller.get("user_id")
+    return await OpportunityService(db).update_opportunity(opportunity_id, **data)
 
-
-@router.delete("/{opportunity_id}")
-async def delete_opportunity(opportunity_id: int, db: AsyncSession = Depends(get_db)):
-    return await OpportunityService(db).delete_opportunity(opportunity_id)

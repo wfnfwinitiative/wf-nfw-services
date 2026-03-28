@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, tuple_
 from sqlalchemy.orm import aliased
 from app.models.opportunity_models import Opportunity
 from app.models.opportunity_event_models import OpportunityEvent
@@ -29,8 +29,46 @@ class OpportunityRepository:
         return result.scalar_one_or_none()
 
     async def get_all(self):
-        result = await self.db.execute(select(Opportunity))
-        return result.scalars().all()
+        latest_event_subq = (
+            select(
+                OpportunityEvent.opportunity_id,
+                OpportunityEvent.previous_status_id,
+                OpportunityEvent.new_status_id,
+            )
+            .where(
+                tuple_(OpportunityEvent.opportunity_id, OpportunityEvent.opportunity_event_id).in_(
+                    select(
+                        OpportunityEvent.opportunity_id,
+                        func.max(OpportunityEvent.opportunity_event_id)
+                    )
+                    .group_by(OpportunityEvent.opportunity_id)
+                )
+            )
+        ).subquery()
+
+        result = await self.db.execute(
+            select(
+                Opportunity,
+                latest_event_subq.c.previous_status_id,
+                latest_event_subq.c.new_status_id,
+            )
+            .outerjoin(
+                latest_event_subq,
+                Opportunity.opportunity_id == latest_event_subq.c.opportunity_id
+            )
+        )
+
+        opportunities = []
+        for row in result:
+            opp = row[0]  # the Opportunity object
+            data = opp.__dict__.copy()
+            data['previous_status_id'] = row[1]
+            data['new_status_id'] = row[2]
+            if row[2]:  # if new_status_id exists
+                data['status_id'] = row[2]
+            opportunities.append(data)
+
+        return opportunities
 
     async def update(self, opportunity_id: int, **kwargs):
         obj = await self.get_by_id(opportunity_id)

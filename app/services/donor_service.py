@@ -38,6 +38,15 @@ class DonorService:
         if not donor:
             raise HTTPException(status_code=404, detail="Donor not found")
 
-        await self.repository.delete(donor_id)
+        await self.repository.update(donor_id, is_active=False)
         await self.db.commit()
-        return {"message": "Donor deleted successfully"}
+        return {"message": "Donor deactivated successfully"}
+
+    async def activate_donor(self, donor_id: int) -> dict:
+        donor = await self.repository.get_by_id(donor_id)
+        if not donor:
+            raise HTTPException(status_code=404, detail="Donor not found")
+
+        await self.repository.update(donor_id, is_active=True)
+        await self.db.commit()
+        return {"message": "Donor activated successfully"}
