@@ -116,20 +116,22 @@ class ReportRepository:
 
     # ---------------- SUMMARY ----------------
     async def get_summary(self, filters):
-        query = select(
-            func.sum(Opportunity.feeding_count).label("total_feeding"),
-            func.count(Opportunity.opportunity_id).label("total_opportunities")
-        )
+     query = select(
+        func.sum(Opportunity.feeding_count).label("total_food"),
+        func.count(Opportunity.opportunity_id).label("total_opportunities"),
+        func.sum(Opportunity.feeding_count).label("total_people_fed")
+    )
 
-        conditions = self.apply_filters([], filters)
+     conditions = self.apply_filters([], filters)
 
-        if conditions:
-            query = query.where(and_(*conditions))
+     if conditions:
+        query = query.where(and_(*conditions))
 
         result = await self.db.execute(query)
-        row = result.first()
+        row = result.mappings().first()   # ✅ FIX
 
         return {
-            "total_food": float(row.total_feeding or 0),
-            "people_count": int(row.total_opportunities or 0)
+            "total_food": float(row["total_food"] or 0),
+            "opportunity_count": int(row["total_opportunities"] or 0),
+            "people_fed": float(row["total_people_fed"] or 0)
         }
