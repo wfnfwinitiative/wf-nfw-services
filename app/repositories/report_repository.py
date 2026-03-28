@@ -7,13 +7,40 @@ from app.models.donor_models import Donor
 from app.models.hunger_spot_models import HungerSpot
 from app.models.status_models import Status
 from app.models.user_models import User
+from app.models.vehicle_models import Vehicle
 
 
 class ReportRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    # ---------------- GRID DATA ----------------
+    # ---------------- COMMON FILTER ----------------
+    def apply_filters(self, conditions, filters):
+        if filters.start_date:
+            conditions.append(Opportunity.created_at >= filters.start_date)
+
+        if filters.end_date:
+            conditions.append(Opportunity.created_at <= filters.end_date)
+
+        if filters.driver_ids:
+            conditions.append(Opportunity.driver_id.in_(filters.driver_ids))
+
+        if filters.hunger_spot_ids:
+            conditions.append(Opportunity.hunger_spot_id.in_(filters.hunger_spot_ids))
+
+        if filters.vehicle_ids:
+            conditions.append(Opportunity.vehicle_id.in_(filters.vehicle_ids))
+
+        if filters.donor_ids:
+            conditions.append(Opportunity.donor_id.in_(filters.donor_ids))
+
+        # 🔥 FIXED STATUS FILTER
+        if filters.status_ids:
+            conditions.append(Opportunity.status_id.in_(filters.status_ids))
+
+        return conditions
+
+    # ---------------- GRID ----------------
     async def get_report_data(self, filters):
         driver_user = aliased(User)
 
@@ -29,37 +56,16 @@ class ReportRepository:
                 HungerSpot.spot_name.label("hunger_spot_name"),
                 Status.status_name,
                 driver_user.name.label("driver_name"),
+                Vehicle.vehicle_no,
             )
             .join(Donor, Opportunity.donor_id == Donor.donor_id)
             .outerjoin(HungerSpot, Opportunity.hunger_spot_id == HungerSpot.hunger_spot_id)
             .join(Status, Opportunity.status_id == Status.status_id)
             .outerjoin(driver_user, Opportunity.driver_id == driver_user.user_id)
+            .outerjoin(Vehicle, Opportunity.vehicle_id == Vehicle.vehicle_id)
         )
 
-        conditions = []
-
-        #  Date filters
-        if filters.start_date:
-            conditions.append(Opportunity.created_at >= filters.start_date)
-
-        if filters.end_date:
-            conditions.append(Opportunity.created_at <= filters.end_date)
-
-        #  Multi filters
-        if filters.driver_ids:
-            conditions.append(Opportunity.driver_id.in_(filters.driver_ids))
-
-        if filters.hunger_spot_ids:
-            conditions.append(Opportunity.hunger_spot_id.in_(filters.hunger_spot_ids))
-
-        if filters.vehicle_ids:   # 🔥 ADDED HERE
-            conditions.append(Opportunity.vehicle_id.in_(filters.vehicle_ids))
-
-        if filters.donor_id:
-            conditions.append(Opportunity.donor_id == filters.donor_id)
-
-        if filters.status_id:
-            conditions.append(Opportunity.status_id == filters.status_id)
+        conditions = self.apply_filters([], filters)
 
         if conditions:
             query = query.where(and_(*conditions))
@@ -78,43 +84,25 @@ class ReportRepository:
                 "hunger_spot_name": r.hunger_spot_name,
                 "status_name": r.status_name,
                 "driver_name": r.driver_name,
+                "vehicle_no": r.vehicle_no,
             }
             for r in rows
         ]
 
-    # ---------------- GRAPH DATA ----------------
+    # ---------------- GRAPH ----------------
     async def get_graph_data(self, filters):
         query = select(
             func.date(Opportunity.created_at).label("date"),
             func.sum(Opportunity.feeding_count).label("total_feeding")
         )
 
-        conditions = []
-
-        #  Date filters
-        if filters.start_date:
-            conditions.append(Opportunity.created_at >= filters.start_date)
-
-        if filters.end_date:
-            conditions.append(Opportunity.created_at <= filters.end_date)
-
-    
-        if filters.driver_ids:
-            conditions.append(Opportunity.driver_id.in_(filters.driver_ids))
-
-        if filters.hunger_spot_ids:
-            conditions.append(Opportunity.hunger_spot_id.in_(filters.hunger_spot_ids))
-
-        if filters.vehicle_ids:   # 🔥 ADDED HERE
-            conditions.append(Opportunity.vehicle_id.in_(filters.vehicle_ids))
-
-        if filters.status_id:
-            conditions.append(Opportunity.status_id == filters.status_id)
+        conditions = self.apply_filters([], filters)
 
         if conditions:
             query = query.where(and_(*conditions))
 
-        query = query.group_by(func.date(Opportunity.created_at)).order_by(func.date(Opportunity.created_at))
+        query = query.group_by(func.date(Opportunity.created_at)) \
+                     .order_by(func.date(Opportunity.created_at))
 
         result = await self.db.execute(query)
 
@@ -133,27 +121,7 @@ class ReportRepository:
             func.count(Opportunity.opportunity_id).label("total_opportunities")
         )
 
-        conditions = []
-
-        # Date filters
-        if filters.start_date:
-            conditions.append(Opportunity.created_at >= filters.start_date)
-
-        if filters.end_date:
-            conditions.append(Opportunity.created_at <= filters.end_date)
-
-        #  Multi filters
-        if filters.driver_ids:
-            conditions.append(Opportunity.driver_id.in_(filters.driver_ids))
-
-        if filters.hunger_spot_ids:
-            conditions.append(Opportunity.hunger_spot_id.in_(filters.hunger_spot_ids))
-
-        if filters.vehicle_ids:  
-            conditions.append(Opportunity.vehicle_id.in_(filters.vehicle_ids))
-
-        if filters.status_id:
-            conditions.append(Opportunity.status_id == filters.status_id)
+        conditions = self.apply_filters([], filters)
 
         if conditions:
             query = query.where(and_(*conditions))

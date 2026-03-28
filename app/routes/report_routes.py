@@ -5,7 +5,7 @@ from app.schemas.report_schemas import ReportFilterRequest
 from app.services.report_service import ReportService
 from app.db.session import get_db
 
-router = APIRouter(prefix="/api/reports", tags=["Reports"])
+router = APIRouter(prefix="/reports", tags=["Reports"])
 
 
 @router.post("/opportunities")
