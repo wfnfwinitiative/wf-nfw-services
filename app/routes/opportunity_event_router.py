@@ -18,3 +18,7 @@ async def create_event(payload: OpportunityEventCreate, db: AsyncSession = Depen
 @router.get("/by-opportunity/{opportunity_id}", response_model=list[OpportunityEventRead])
 async def get_events(opportunity_id: int, db: AsyncSession = Depends(get_db)):
     return await OpportunityEventService(db).get_events_for_opportunity(opportunity_id)
+
+@router.put("/{event_id}", response_model=OpportunityEventRead)
+async def update_event(event_id: int, payload: OpportunityEventCreate, db: AsyncSession = Depends(get_db)):
+    return await OpportunityEventService(db).update_event(event_id, **payload.dict())

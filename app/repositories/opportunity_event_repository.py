@@ -20,3 +20,17 @@ class OpportunityEventRepository:
             )
         )
         return result.scalars().all()
+    
+    async def update(self, opportunity_event_id: int, **data):
+        result = await self.db.execute(
+            select(OpportunityEvent).where(
+                OpportunityEvent.opportunity_event_id == opportunity_event_id
+            )
+        )
+        obj = result.scalar_one_or_none()
+        if not obj:
+            return None
+        for key, value in data.items():
+            setattr(obj, key, value)
+        await self.db.flush()
+        return obj

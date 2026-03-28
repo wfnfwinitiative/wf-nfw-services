@@ -14,3 +14,8 @@ class OpportunityEventService:
 
     async def get_events_for_opportunity(self, opportunity_id: int):
         return await self.repo.get_by_opportunity(opportunity_id)
+    
+    async def update_event(self, opportunity_event_id: int, **data):
+        obj = await self.repo.update(opportunity_event_id, **data)
+        await self.db.commit()
+        return obj
