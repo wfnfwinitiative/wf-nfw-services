@@ -2,9 +2,11 @@
 import logging
 import os
 import tempfile
+from urllib.parse import urlencode
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Request, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.db.session import get_db
 from app.repositories.google_drive_repository import GoogleDriveRepository
 from app.services.opportunity_service import OpportunityService
@@ -13,6 +15,25 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 drive_repo = GoogleDriveRepository()
+
+
+@router.get('/oauth-url')
+def get_oauth_url():
+    """Returns the Google OAuth2 authorization URL for Google Drive access setup.
+    The URL is built from server-side config so the redirect_uri always matches
+    the currently deployed backend (local dev or Vercel production).
+    """
+    params = {
+        'client_id': settings.GOOGLE_CLIENT_ID,
+        'redirect_uri': settings.GOOGLE_REDIRECT_URI,
+        'response_type': 'code',
+        'scope': 'https://www.googleapis.com/auth/drive.file',
+        'access_type': 'offline',
+        'prompt': 'consent',
+    }
+    url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
+    return {"url": url}
+
 
 @router.post('/upload-image')
 async def upload_image(
@@ -61,7 +82,7 @@ async def upload_image(
 
         result = drive_repo.validate_and_upload(
             temp_path,
-            file.filename,
+            file.filename or "image.jpg",
             upload_type,
             driver_name,
             opportunity_id,
@@ -73,7 +94,7 @@ async def upload_image(
             folder_id = result.get('folder_id')
             if folder_id:
                 await OpportunityService(db).update_opportunity(
-                    opportunity_obj.opportunity_id,
+                    opportunity_obj['opportunity_id'],
                     **{folder_field: folder_id},
                 )
 
