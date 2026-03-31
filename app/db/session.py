@@ -2,6 +2,7 @@ import os
 import ssl
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.pool import NullPool
 from app.core.config import settings
 
 DATABASE_URL = settings.DATABASE_URL
@@ -15,9 +16,11 @@ ssl_context.verify_mode = ssl.CERT_NONE
 
 engine = create_async_engine(
     DATABASE_URL,
-    connect_args={"ssl": ssl_context},
-    pool_size=10,
-    max_overflow=20,
+    connect_args={
+        "ssl": ssl_context,
+        "statement_cache_size": 0,
+    },
+    poolclass=NullPool,
 )
 
 SessionLocal = sessionmaker(
