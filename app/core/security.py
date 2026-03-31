@@ -19,7 +19,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(_pre_hash(plain_password), hashed_password)
 
 
-def create_access_token(user_id: int, name: str, role: str):
+def create_access_token(user_id: int, name: str, role: list):
     to_encode = {
         "sub": str(user_id),
         "role": role,
