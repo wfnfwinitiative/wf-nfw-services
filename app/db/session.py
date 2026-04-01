@@ -18,8 +18,7 @@ engine = create_async_engine(
     DATABASE_URL,
     connect_args={
         "ssl": ssl_context,
-        "statement_cache_size": 20,  # Enable prepared statement caching for performance
-        "max_cached_statement_lifetime": 300,
+        "statement_cache_size": 0,  # Disable prepared statement caching for PgBouncer compatibility
     },
     echo=False,
     pool_pre_ping=True,  # Verify connections before use in serverless
