@@ -96,33 +96,6 @@ class OpportunityDetailedRead(OpportunityBaseSchema):
     new_status_id: Optional[int]
 
 
-class OpportunityTrackingRead(OpportunityBaseSchema):
-    opportunity_id: int
-    donor_id: int
-    status_id: int
-    status_name: str
-    driver_id: Optional[int]
-    driver_name: Optional[str]
-    vehicle_id: Optional[int]
-    vehicle_name: Optional[str]
-    creator_id: int
-    creator_name: str
-    donor_name: str
-    hunger_spot_name: Optional[str]
-    pickup_location: Optional[str]
-    pickup_lat: Optional[float]
-    pickup_lng: Optional[float]
-    drop_location: Optional[str]
-    drop_lat: Optional[float]
-    drop_lng: Optional[float]
-    pickup_eta: Optional[datetime]
-    delivery_by: Optional[datetime]
-    previous_status_id: Optional[int]
-    previous_status_name: Optional[str]
-    new_status_id: Optional[int]
-    new_status_name: Optional[str]
-
-
 class OpportunityDetailRead(OpportunityBaseSchema):
     opportunity_id: int
     donor_id: int

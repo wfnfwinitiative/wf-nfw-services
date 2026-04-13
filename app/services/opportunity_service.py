@@ -57,9 +57,6 @@ class OpportunityService:
     async def get_opportunities_by_driver_id(self, driver_id: int):
         return await self.repo.get_by_driver_id(driver_id)
 
-    async def get_active_opportunities_for_tracking(self):
-        return await self.repo.get_active_tracking()
-
     async def update_opportunity(self, opportunity_id: int, **data):
         creator_id = data.pop('creator_id', None)
         obj = await self.repo.get_by_id(opportunity_id)
