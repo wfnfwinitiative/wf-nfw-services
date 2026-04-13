@@ -126,12 +126,16 @@ class OpportunityRepository:
                 Donor.donor_name,
                 Donor.location.label('pickup_location'),
                 Donor.mobile_number.label('pickup_contact_no'),
+                Donor.latitude.label('pickup_lat'),
+                Donor.longitude.label('pickup_lng'),
                 Status.status_name,
                 driver_user.name.label('driver_name'),
                 creator_user.name.label('creator_name'),
                 Vehicle.vehicle_no.label('vehicle_name'),
                 HungerSpot.location.label('drop_location'),
                 HungerSpot.mobile_number.label('drop_location_contact_no'),
+                HungerSpot.latitude.label('drop_lat'),
+                HungerSpot.longitude.label('drop_lng'),
 
                 previous_status.status_id.label("previous_status_id"),
                 previous_status.status_name.label("previous_status_name"),
@@ -195,6 +199,10 @@ class OpportunityRepository:
                 'pickup_contact_no': row.pickup_contact_no,
                 'drop_location': row.drop_location,
                 'drop_location_contact_no': row.drop_location_contact_no,
+                'pickup_lat': float(row.pickup_lat) if row.pickup_lat is not None else None,
+                'pickup_lng': float(row.pickup_lng) if row.pickup_lng is not None else None,
+                'drop_lat': float(row.drop_lat) if row.drop_lat is not None else None,
+                'drop_lng': float(row.drop_lng) if row.drop_lng is not None else None,
                 'created_at': row.created_at,
                 'updated_at': row.updated_at,
                 'previous_status_id': row.previous_status_id,
@@ -204,3 +212,107 @@ class OpportunityRepository:
             })
 
         return opportunities
+
+    async def get_active_tracking(self):
+        """
+        Returns all opportunities currently in an active transit state
+        (status_id 2 = Assigned, 3 = InPicked) together with coordinates
+        needed to display them on the coordinator's live-tracking map.
+        """
+        creator_user = aliased(User)
+        driver_user = aliased(User)
+        previous_status = aliased(Status)
+        new_status = aliased(Status)
+
+        latest_event_subq = (
+            select(
+                OpportunityEvent.opportunity_id,
+                func.max(OpportunityEvent.opportunity_event_id).label("latest_event_id"),
+            )
+            .group_by(OpportunityEvent.opportunity_id)
+            .subquery()
+        )
+
+        result = await self.db.execute(
+            select(
+                Opportunity.opportunity_id,
+                Opportunity.donor_id,
+                Opportunity.status_id,
+                Opportunity.driver_id,
+                Opportunity.vehicle_id,
+                Opportunity.creator_id,
+                Opportunity.pickup_eta,
+                Opportunity.delivery_by,
+                Donor.donor_name,
+                Donor.location.label("pickup_location"),
+                Donor.latitude.label("pickup_lat"),
+                Donor.longitude.label("pickup_lng"),
+                Status.status_name,
+                driver_user.name.label("driver_name"),
+                creator_user.name.label("creator_name"),
+                Vehicle.vehicle_no.label("vehicle_name"),
+                HungerSpot.spot_name.label("hunger_spot_name"),
+                HungerSpot.location.label("drop_location"),
+                HungerSpot.latitude.label("drop_lat"),
+                HungerSpot.longitude.label("drop_lng"),
+                previous_status.status_id.label("previous_status_id"),
+                previous_status.status_name.label("previous_status_name"),
+                new_status.status_id.label("new_status_id"),
+                new_status.status_name.label("new_status_name"),
+            )
+            .join(Donor, Opportunity.donor_id == Donor.donor_id)
+            .join(Status, Opportunity.status_id == Status.status_id)
+            .join(creator_user, Opportunity.creator_id == creator_user.user_id)
+            .outerjoin(driver_user, Opportunity.driver_id == driver_user.user_id)
+            .outerjoin(Vehicle, Opportunity.vehicle_id == Vehicle.vehicle_id)
+            .outerjoin(HungerSpot, Opportunity.hunger_spot_id == HungerSpot.hunger_spot_id)
+            .outerjoin(
+                latest_event_subq,
+                Opportunity.opportunity_id == latest_event_subq.c.opportunity_id,
+            )
+            .outerjoin(
+                OpportunityEvent,
+                OpportunityEvent.opportunity_event_id == latest_event_subq.c.latest_event_id,
+            )
+            .outerjoin(
+                previous_status,
+                OpportunityEvent.previous_status_id == previous_status.status_id,
+            )
+            .outerjoin(
+                new_status,
+                OpportunityEvent.new_status_id == new_status.status_id,
+            )
+            .where(Opportunity.status_id.in_([2, 3]))
+            .where(Opportunity.driver_id.isnot(None))
+        )
+
+        rows = []
+        for row in result:
+            rows.append({
+                "opportunity_id": row.opportunity_id,
+                "donor_id": row.donor_id,
+                "status_id": row.status_id,
+                "status_name": row.status_name,
+                "driver_id": row.driver_id,
+                "driver_name": row.driver_name,
+                "vehicle_id": row.vehicle_id,
+                "vehicle_name": row.vehicle_name,
+                "creator_id": row.creator_id,
+                "creator_name": row.creator_name,
+                "donor_name": row.donor_name,
+                "hunger_spot_name": row.hunger_spot_name,
+                "pickup_location": row.pickup_location,
+                "pickup_lat": float(row.pickup_lat) if row.pickup_lat is not None else None,
+                "pickup_lng": float(row.pickup_lng) if row.pickup_lng is not None else None,
+                "drop_location": row.drop_location,
+                "drop_lat": float(row.drop_lat) if row.drop_lat is not None else None,
+                "drop_lng": float(row.drop_lng) if row.drop_lng is not None else None,
+                "pickup_eta": row.pickup_eta,
+                "delivery_by": row.delivery_by,
+                "previous_status_id": row.previous_status_id,
+                "previous_status_name": row.previous_status_name,
+                "new_status_id": row.new_status_id,
+                "new_status_name": row.new_status_name,
+            })
+
+        return rows

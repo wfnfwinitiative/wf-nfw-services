@@ -7,6 +7,7 @@ from app.schemas.opportunity_schemas import (
     OpportunityRead,
     OpportunityUpdate,
     OpportunityDetailRead,
+    OpportunityTrackingRead,
 )
 from app.services.opportunity_service import OpportunityService
 from app.dependencies.auth import require_roles
@@ -29,6 +30,15 @@ async def create_opportunity(
 @router.get("/", response_model=list[OpportunityRead])
 async def get_opportunities(db: AsyncSession = Depends(get_db)):
     return await OpportunityService(db).get_all_opportunities()
+
+
+@router.get("/active-tracking", response_model=list[OpportunityTrackingRead])
+async def get_active_tracking_opportunities(
+    db: AsyncSession = Depends(get_db),
+    caller: dict = Depends(require_roles(["ADMIN", "COORDINATOR"])),
+):
+    """Returns all assigned/in-progress opportunities with coordinates for the live tracking map."""
+    return await OpportunityService(db).get_active_opportunities_for_tracking()
 
 
 @router.get("/{opportunity_id}", response_model=OpportunityDetailRead)

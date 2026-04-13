@@ -23,6 +23,7 @@ from app.routes import (
     opportunity_event_item_driver_router,
     google_drive_router,
     status_router,
+    driver_location_router,
 )
 
 app = FastAPI(
@@ -103,5 +104,6 @@ app.include_router(google_drive_router.router, prefix="/api")
 app.include_router(opportunity_event_item_driver_router.router, prefix="/api")
 app.include_router(report_routes.router, prefix="/api")
 app.include_router(status_router.router, prefix="/api")
+app.include_router(driver_location_router.router, prefix="/api")
 
 

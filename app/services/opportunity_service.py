@@ -57,16 +57,29 @@ class OpportunityService:
     async def get_opportunities_by_driver_id(self, driver_id: int):
         return await self.repo.get_by_driver_id(driver_id)
 
+    async def get_active_opportunities_for_tracking(self):
+        return await self.repo.get_active_tracking()
+
     async def update_opportunity(self, opportunity_id: int, **data):
         creator_id = data.pop('creator_id', None)
         obj = await self.repo.get_by_id(opportunity_id)
         if not obj:
             raise HTTPException(status_code=404, detail="Opportunity not found")
-        
-        previous_status = obj.status_id
+
+        # Determine the *effective* current status from the latest event,
+        # because driver rejection only creates an event without updating status_id.
+        latest_event_result = await self.db.execute(
+            select(OpportunityEvent.new_status_id)
+            .where(OpportunityEvent.opportunity_id == opportunity_id)
+            .order_by(OpportunityEvent.opportunity_event_id.desc())
+            .limit(1)
+        )
+        latest_new_status = latest_event_result.scalar_one_or_none()
+        previous_status = latest_new_status if latest_new_status is not None else obj.status_id
+
         new_status = data.get('status_id')
         notes = data.get('notes')
-        
+
         if new_status and new_status != previous_status:
             # Create event
             event = OpportunityEvent(
@@ -77,13 +90,13 @@ class OpportunityService:
                 notes=notes
             )
             self.db.add(event)
-        
+
         # Update the obj
         for k, v in data.items():
             setattr(obj, k, v)
-        
+
         await self.db.commit()
-        
+
         # Return dict
         data = obj.__dict__.copy()
         data['previous_status_id'] = previous_status if new_status and new_status != previous_status else None
