@@ -26,8 +26,11 @@ from app.scripts.seed_roles import seed_roles
 from app.scripts.seed_statuses import seed_statuses
 from app.scripts.seed_feature_flags import seed_feature_flags
 from app.scripts.db_constraints import apply_changes
+from app.scripts.seed_test_data import seed_test_data, seed_inital_admin_coord_driver
+
 
 SCHEMA = settings.DB_SCHEMA
+import sys
 
 
 async def full_reset():
@@ -62,5 +65,39 @@ async def full_reset():
     print("Database dropped, recreated, hardened, and seeded successfully!")
 
 
+async def full_reset_with_test_data():
+    """Full reset + seed test data (users, donors, hunger spots, vehicles)"""
+    await full_reset()
+    
+    print("\n" + "="*60)
+    print("Seeding test data...")
+    print("="*60 + "\n")
+    
+    await seed_test_data()
+
+
+async def main():
+    include_test_data = "--with-test-data" in sys.argv or "-t" in sys.argv
+    include_initial_accounts = "--with-initial-accounts" in sys.argv or "-a" in sys.argv
+
+    print("\n" + "="*60)
+    print("Resetting the database and seeding lookup tables (roles, statuses, feature flags)...")
+    await full_reset()
+
+    if include_initial_accounts:
+        print("\n" + "="*60)
+        print("Seeding initial accounts (admin, coordinator, driver)...")
+        print("="*60 + "\n")
+        await seed_inital_admin_coord_driver()
+
+    if include_test_data:
+        print("\n" + "="*60)
+        print("Seeding full test data (users, donors, hunger spots, vehicles)...")
+        print("="*60 + "\n")
+        await seed_test_data()
+
+
 if __name__ == "__main__":
-    asyncio.run(full_reset())
+    asyncio.run(main())
+    
+    
