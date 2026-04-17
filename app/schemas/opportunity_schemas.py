@@ -40,8 +40,8 @@ class OpportunityRead(OpportunityBaseSchema):
     food_collected: Optional[Decimal]
     pickup_eta: Optional[datetime]
     delivery_by: Optional[datetime]
-    start_time: Optional[datetime]
-    end_time: Optional[datetime]
+    picked_up_at: Optional[datetime]
+    delivered_at: Optional[datetime]
     notes: Optional[str]
     image_link: Optional[str]
     pickup_folder_id: Optional[str]
@@ -67,8 +67,8 @@ class OpportunityUpdate(BaseModel):
     image_link: Optional[str] = None
     pickup_folder_id: Optional[str]
     delivery_folder_id: Optional[str]
-    start_time: Optional[datetime]
-    end_time: Optional[datetime]
+    picked_up_at: Optional[datetime]
+    delivered_at: Optional[datetime]
 
 class OpportunityDetailedRead(OpportunityBaseSchema):
     opportunity_id: int
@@ -90,8 +90,8 @@ class OpportunityDetailedRead(OpportunityBaseSchema):
     food_collected: Optional[Decimal]
     pickup_eta: Optional[datetime]
     delivery_by: Optional[datetime]
-    start_time: Optional[datetime]
-    end_time: Optional[datetime]
+    picked_up_at: Optional[datetime]
+    delivered_at: Optional[datetime]
     notes: Optional[str]
     image_link: Optional[str]
     pickup_folder_id: Optional[str]
@@ -125,8 +125,8 @@ class OpportunityDetailRead(OpportunityBaseSchema):
     feeding_count: Optional[int]
     pickup_eta: Optional[datetime]
     delivery_by: Optional[datetime]
-    start_time: Optional[datetime]
-    end_time: Optional[datetime]
+    picked_up_at: Optional[datetime]
+    delivered_at: Optional[datetime]
     notes: Optional[str]
     image_link: Optional[str]
     pickup_folder_id: Optional[str]

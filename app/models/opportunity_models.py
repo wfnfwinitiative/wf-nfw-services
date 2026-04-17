@@ -38,8 +38,8 @@ class Opportunity(Base):
 
     pickup_eta = Column(TIMESTAMP(timezone=True))
     delivery_by = Column(TIMESTAMP(timezone=True))
-    start_time = Column(TIMESTAMP(timezone=True))
-    end_time = Column(TIMESTAMP(timezone=True))
+    picked_up_at = Column(TIMESTAMP(timezone=True))
+    delivered_at = Column(TIMESTAMP(timezone=True))
 
     notes = Column(Text)
     image_link = Column(String(255))

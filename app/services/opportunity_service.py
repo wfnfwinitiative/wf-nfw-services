@@ -28,8 +28,8 @@ class OpportunityService:
         result['previous_status_id'] = None
         result['new_status_id'] = obj.status_id
         # Ensure all fields are present
-        result.setdefault('start_time', None)
-        result.setdefault('end_time', None)
+        result.setdefault('picked_up_at', None)
+        result.setdefault('delivered_at', None)
         result.setdefault('pickup_folder_id', None)
         result.setdefault('delivery_folder_id', None)
         return result
