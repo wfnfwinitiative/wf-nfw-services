@@ -13,17 +13,26 @@ class OpportunityService:
 
     async def create_opportunity(self, **data):
         obj = await self.repo.create(**data)
+        # Create initial event recording the creation status
+        event = OpportunityEvent(
+            opportunity_id=obj.opportunity_id,
+            previous_status_id=None,
+            new_status_id=obj.status_id,
+            creator_id=obj.creator_id,
+            notes=obj.notes,
+        )
+        self.db.add(event)
         await self.db.commit()
-        # Return as dict with status ids as None
-        data = obj.__dict__.copy()
-        data['previous_status_id'] = None
-        data['new_status_id'] = None
+        # Return as dict
+        result = obj.__dict__.copy()
+        result['previous_status_id'] = None
+        result['new_status_id'] = obj.status_id
         # Ensure all fields are present
-        data.setdefault('start_time', None)
-        data.setdefault('end_time', None)
-        data.setdefault('pickup_folder_id', None)
-        data.setdefault('delivery_folder_id', None)
-        return data
+        result.setdefault('start_time', None)
+        result.setdefault('end_time', None)
+        result.setdefault('pickup_folder_id', None)
+        result.setdefault('delivery_folder_id', None)
+        return result
 
     async def get_opportunity(self, opportunity_id: int):
         obj = await self.repo.get_by_id(opportunity_id)

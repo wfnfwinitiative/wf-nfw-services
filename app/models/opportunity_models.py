@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, BigInteger, SmallInteger, Integer,
+    Column, BigInteger, SmallInteger, Integer, Numeric,
     String, Text, TIMESTAMP, ForeignKey
 )
 from sqlalchemy.schema import Identity
@@ -30,7 +30,12 @@ class Opportunity(Base):
     creator_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"), nullable=False)
     assignee_id = Column(BigInteger, ForeignKey(f"{SCHEMA}.users.user_id"))
 
+    estimated_count = Column(Integer)
+    estimated_unit = Column(String(10))
+
     feeding_count = Column(Integer)
+    food_collected = Column(Numeric(10, 2))
+
     pickup_eta = Column(TIMESTAMP(timezone=True))
     delivery_by = Column(TIMESTAMP(timezone=True))
     start_time = Column(TIMESTAMP(timezone=True))

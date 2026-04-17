@@ -49,6 +49,7 @@ class ReportRepository:
                 Opportunity.opportunity_id,
                 Opportunity.created_at,
                 Opportunity.feeding_count,
+                Opportunity.food_collected,
                 Opportunity.pickup_eta,
                 Opportunity.delivery_by,
 
@@ -78,6 +79,7 @@ class ReportRepository:
                 "opportunity_id": r.opportunity_id,
                 "created_at": r.created_at,
                 "feeding_count": r.feeding_count,
+                "food_collected": r.food_collected,
                 "pickup_eta": r.pickup_eta,
                 "delivery_by": r.delivery_by,
                 "donor_name": r.donor_name,
@@ -117,7 +119,7 @@ class ReportRepository:
     # ---------------- SUMMARY ----------------
     async def get_summary(self, filters):
      query = select(
-        func.sum(Opportunity.feeding_count).label("total_food"),
+        func.sum(Opportunity.food_collected).label("total_food"),
         func.count(Opportunity.opportunity_id).label("total_opportunities"),
         func.sum(Opportunity.feeding_count).label("total_people_fed")
     )

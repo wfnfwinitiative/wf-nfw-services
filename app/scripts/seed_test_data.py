@@ -1,9 +1,9 @@
 """
 Seed script to populate test data:
-- 50 Users (mix of roles)
-- 50 Donors (Hyderabad-based)
-- 50 Hunger Spots (Hyderabad-based)
-- 50 Vehicles (unique license plates)
+- SEED_COUNT Users (mix of roles)
+- SEED_COUNT Donors (Hyderabad-based)
+- SEED_COUNT Hunger Spots (Hyderabad-based)
+- SEED_COUNT Vehicles (unique license plates)
 """
 
 import asyncio
@@ -124,6 +124,8 @@ LAST_NAMES = [
     "Iyer", "Desai", "Verma", "Mishra", "Pandey", "Tripathi", "Saxena", "Kapoor",
     "Walia", "Grover", "Menon", "Bhat", "Hegde", "Kulkarni", "Deshpande"
 ]
+
+SEED_COUNT = 5  # Number of records to seed for each entity (users, donors, hunger spots, vehicles)
 
 COMMON_PASSWORD = "Password@123"
 PINCODE = " - 500000"  # Generic Hyderabad pincode
@@ -290,9 +292,9 @@ async def seed_test_data():
     async with AsyncSession(engine) as db:
         try:
             # ============= 1. SEED DRIVERS (ALL USERS ARE DRIVERS) =============
-            print("👥 Seeding 50 Drivers...")
+            print(f"👥 Seeding {SEED_COUNT} Drivers...")
             users = []
-            for i in range(1, 51):
+            for i in range(1, SEED_COUNT + 1):
                 first_name = random.choice(FIRST_NAMES)
                 last_name = random.choice(LAST_NAMES)
                 name = f"{first_name} {last_name}"
@@ -312,7 +314,7 @@ async def seed_test_data():
                 users.append(user)
             
             await db.flush()  # Get IDs before committing
-            print(f"   ✓ Created 50 drivers")
+            print(f"   ✓ Created {SEED_COUNT} drivers")
             
             # ============= 2. ASSIGN DRIVER ROLE TO ALL USERS =============
             print("🚗 Assigning DRIVER role to all users...")
@@ -327,11 +329,11 @@ async def seed_test_data():
             print(f"   ✓ All {len(users)} users assigned DRIVER role")
             
             # ============= 3. SEED DONORS =============
-            print("\n🍽️  Seeding 50 Donors (Hyderabad)...")
+            print(f"\n🍽️  Seeding {SEED_COUNT} Donors (Hyderabad)...")
             donors = []
             used_phones = set()
-            
-            for i in range(1, 51):
+
+            for i in range(1, SEED_COUNT + 1):
                 area = random.choice(HYDERABAD_AREAS)
                 donor_name = random.choice(DONOR_NAMES)
                 contact_person = f"{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}"
@@ -343,7 +345,8 @@ async def seed_test_data():
                 used_phones.add(phone)
                 
                 latitude, longitude = generate_gps_coordinates(area)
-                
+                address = generate_address(area, donor_name)
+
                 donor = Donor(
                     creator_id=random.choice(users).user_id,
                     donor_name=donor_name,
@@ -351,8 +354,8 @@ async def seed_test_data():
                     pincode="500000",
                     contact_person=contact_person,
                     mobile_number=phone,
-                    address=generate_address(area, donor_name),
-                    location=area,
+                    address=address,
+                    location=address,
                     latitude=latitude,
                     longitude=longitude,
                     is_active=True,
@@ -362,14 +365,14 @@ async def seed_test_data():
                 donors.append(donor)
             
             await db.flush()
-            print(f"   ✓ Created 50 donors across Hyderabad areas")
-            
+            print(f"   ✓ Created {SEED_COUNT} donors across Hyderabad areas")
+
             # ============= 4. SEED HUNGER SPOTS =============
-            print("💝 Seeding 50 Hunger Spots (Hyderabad)...")
+            print(f"💝 Seeding {SEED_COUNT} Hunger Spots (Hyderabad)...")
             hunger_spots = []
             used_phones_hs = set()
-            
-            for i in range(1, 51):
+
+            for i in range(1, SEED_COUNT + 1):
                 area = random.choice(HYDERABAD_AREAS)
                 spot_name = random.choice(HUNGER_SPOT_NAMES)
                 contact_person = f"{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}"
@@ -381,7 +384,8 @@ async def seed_test_data():
                 used_phones_hs.add(phone)
                 
                 latitude, longitude = generate_gps_coordinates(area)
-                
+                address = generate_address(area, spot_name)
+
                 hunger_spot = HungerSpot(
                     creator_id=random.choice(users).user_id,
                     spot_name=spot_name,
@@ -389,8 +393,8 @@ async def seed_test_data():
                     pincode="500000",
                     contact_person=contact_person,
                     mobile_number=phone,
-                    address=generate_address(area, spot_name),
-                    location=area,
+                    address=address,
+                    location=address,
                     latitude=latitude,
                     longitude=longitude,
                     capacity_meals=random.randint(50, 500),
@@ -401,14 +405,14 @@ async def seed_test_data():
                 hunger_spots.append(hunger_spot)
             
             await db.flush()
-            print(f"   ✓ Created 50 hunger spots across Hyderabad areas")
-            
+            print(f"   ✓ Created {SEED_COUNT} hunger spots across Hyderabad areas")
+
             # ============= 5. SEED VEHICLES =============
-            print("🚗 Seeding 50 Vehicles...")
+            print(f"🚗 Seeding {SEED_COUNT} Vehicles...")
             vehicles = []
             used_vehicle_numbers = set()
-            
-            for i in range(1, 51):
+
+            for i in range(1, SEED_COUNT + 1):
                 vehicle_no = generate_vehicle_number()
                 while vehicle_no in used_vehicle_numbers:
                     vehicle_no = generate_vehicle_number()
@@ -428,7 +432,7 @@ async def seed_test_data():
                 vehicles.append(vehicle)
             
             await db.flush()
-            print(f"   ✓ Created 50 vehicles with unique license plates")
+            print(f"   ✓ Created {SEED_COUNT} vehicles with unique license plates")
             
             # Commit all changes
             await db.commit()

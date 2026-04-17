@@ -26,7 +26,7 @@ async def create_opportunity(
     )
 
 
-@router.get("/", response_model=list[OpportunityRead])
+@router.get("/", response_model=list[OpportunityDetailedRead])
 async def get_opportunities(db: AsyncSession = Depends(get_db)):
     return await OpportunityService(db).get_all_opportunities()
 
