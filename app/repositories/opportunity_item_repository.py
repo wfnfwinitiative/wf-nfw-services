@@ -29,6 +29,14 @@ class OpportunityItemRepository:
         )
         return result.scalars().all()
 
+    async def update(self, item_id: int, **data):
+        obj = await self.get_by_id(item_id)
+        if obj:
+            for key, value in data.items():
+                setattr(obj, key, value)
+            await self.db.flush()
+        return obj
+
     async def delete(self, item_id: int):
         obj = await self.get_by_id(item_id)
         if obj:

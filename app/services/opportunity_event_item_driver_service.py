@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories.opportunity_event_repository import OpportunityEventRepository
 from app.repositories.opportunity_item_repository import OpportunityItemRepository
+from app.repositories.opportunity_repository import OpportunityRepository
 
 
 class OpportunityEventItemDriverService:
@@ -9,6 +10,12 @@ class OpportunityEventItemDriverService:
         self.db = db
         self.event_repo = OpportunityEventRepository(db)
         self.item_repo = OpportunityItemRepository(db)
+        self.opportunity_repo = OpportunityRepository(db)
+
+    async def _recalculate_feeding_count(self, opportunity_id: int):
+        items = await self.item_repo.get_by_opportunity(opportunity_id)
+        total = sum(float(item.quantity_value) for item in items)
+        await self.opportunity_repo.update(opportunity_id, feeding_count=int(total * 2), food_collected=total)
 
     async def process_opportunity(self, event_data, items_data):
 
@@ -41,6 +48,8 @@ class OpportunityEventItemDriverService:
             for item in items_data:
                 item["opportunity_id"] = opportunity.opportunity_id
                 created_items.append(await self.item_repo.create(**item))
+
+            await self._recalculate_feeding_count(opportunity.opportunity_id)
 
         return {
             "event": opportunity,

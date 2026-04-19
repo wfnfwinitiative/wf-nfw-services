@@ -13,17 +13,26 @@ class OpportunityService:
 
     async def create_opportunity(self, **data):
         obj = await self.repo.create(**data)
+        # Create initial event recording the creation status
+        event = OpportunityEvent(
+            opportunity_id=obj.opportunity_id,
+            previous_status_id=None,
+            new_status_id=obj.status_id,
+            creator_id=obj.creator_id,
+            notes=obj.notes,
+        )
+        self.db.add(event)
         await self.db.commit()
-        # Return as dict with status ids as None
-        data = obj.__dict__.copy()
-        data['previous_status_id'] = None
-        data['new_status_id'] = None
+        # Return as dict
+        result = obj.__dict__.copy()
+        result['previous_status_id'] = None
+        result['new_status_id'] = obj.status_id
         # Ensure all fields are present
-        data.setdefault('start_time', None)
-        data.setdefault('end_time', None)
-        data.setdefault('pickup_folder_id', None)
-        data.setdefault('delivery_folder_id', None)
-        return data
+        result.setdefault('picked_up_at', None)
+        result.setdefault('delivered_at', None)
+        result.setdefault('pickup_folder_id', None)
+        result.setdefault('delivery_folder_id', None)
+        return result
 
     async def get_opportunity(self, opportunity_id: int):
         obj = await self.repo.get_by_id(opportunity_id)
@@ -62,11 +71,21 @@ class OpportunityService:
         obj = await self.repo.get_by_id(opportunity_id)
         if not obj:
             raise HTTPException(status_code=404, detail="Opportunity not found")
-        
-        previous_status = obj.status_id
+
+        # Determine the *effective* current status from the latest event,
+        # because driver rejection only creates an event without updating status_id.
+        latest_event_result = await self.db.execute(
+            select(OpportunityEvent.new_status_id)
+            .where(OpportunityEvent.opportunity_id == opportunity_id)
+            .order_by(OpportunityEvent.opportunity_event_id.desc())
+            .limit(1)
+        )
+        latest_new_status = latest_event_result.scalar_one_or_none()
+        previous_status = latest_new_status if latest_new_status is not None else obj.status_id
+
         new_status = data.get('status_id')
         notes = data.get('notes')
-        
+
         if new_status and new_status != previous_status:
             # Create event
             event = OpportunityEvent(
@@ -77,13 +96,13 @@ class OpportunityService:
                 notes=notes
             )
             self.db.add(event)
-        
+
         # Update the obj
         for k, v in data.items():
             setattr(obj, k, v)
-        
+
         await self.db.commit()
-        
+
         # Return dict
         data = obj.__dict__.copy()
         data['previous_status_id'] = previous_status if new_status and new_status != previous_status else None
